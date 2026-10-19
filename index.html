@@ -83,6 +83,7 @@ dialog[open]::backdrop{animation:fade .3s}
 .card{margin-bottom:12px}
 .app{max-width:460px;min-height:100vh;margin:0 auto;background:var(--bg);padding:18px 18px 120px;backdrop-filter:blur(24px) saturate(1.3);-webkit-backdrop-filter:blur(24px) saturate(1.3);border:1px solid var(--edge);border-top:0;border-bottom:0;box-shadow:var(--shadow)}
 .top{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+.brand{display:flex;align-items:center;gap:10px;min-width:0}.logo{width:40px;height:40px;border-radius:12px;object-fit:cover;flex:none;box-shadow:var(--shadow);background:var(--tint)}
 .word{font-size:1.55rem;font-weight:800;letter-spacing:-.03em}
 .ibtn{position:relative;width:46px;height:46px;border-radius:50%;border:0;background:var(--soft);display:grid;place-items:center}
 .ibtn+.ibtn{margin-left:8px}
@@ -306,7 +307,7 @@ const views = {
   home: () => {
     const hot = [...D.items].filter(i => flt === 'all' || i.stock).sort((a, b) => (b.total - b.stock) - (a.total - a.stock)).slice(0, 4);
     const n = mineActive().length;
-    return `<div class="top"><span class="word">BisaPINJAM</span><div style="display:flex"><button class="ibtn" data-heart aria-label="Barang favorit">${ic('heart')}</button><button class="ibtn" data-tab="mine" aria-label="Pinjaman saya">${ic('bag')}${n ? `<span class="badge">${n}</span>` : ''}</button></div></div>
+    return `<div class="top"><div class="brand"><img class="logo" src="icon.jpg" alt="" onerror="this.remove()"><span class="word">BisaPINJAM</span></div><div style="display:flex"><button class="ibtn" data-heart aria-label="Barang favorit">${ic('heart')}</button><button class="ibtn" data-tab="mine" aria-label="Pinjaman saya">${ic('bag')}${n ? `<span class="badge">${n}</span>` : ''}</button></div></div>
 <form class="search" id="hs">${ic('search')}<input id="hq" type="search" placeholder="Cari nama atau kode barang" aria-label="Cari barang"><button type="button" class="flt" data-tab="barang" aria-label="Lihat semua barang">${ic('sliders')}</button></form>
 <div class="toggle"><button data-flt="all" aria-pressed="${flt === 'all'}">Semua barang</button><button data-flt="ok" aria-pressed="${flt === 'ok'}">Tersedia</button></div>
 <section class="hero"><div><span class="pill">Baru</span><h2>Pinjam alat praktik</h2><p>Scan QR di barang atau pilih dari daftar untuk mulai meminjam.</p><button class="dark" data-tab="scan">${ic('qr')}Scan sekarang</button></div>${photo('stok1.jpg', 'tag', '')}</section>
