@@ -9,11 +9,9 @@
 <link rel="preload" as="image" href="splash.jpg">
 <style>#splash{position:fixed;inset:0;z-index:9999;background:#2563eb url(splash.jpg) center/cover no-repeat;transition:opacity .4s}#splash.out{opacity:0;pointer-events:none}.nosplash #splash{display:none}</style>
 <script>
-/* Splash: tampil langsung saat pertama buka (sekali per sesi), hilang setelah data siap */
-(function(){var s=0;try{s=sessionStorage.getItem('pp-splash')}catch(e){}
-if(s){document.documentElement.className+=' nosplash';window.hideSplash=function(){};return}
-var t0=Date.now(),done=0;
-window.hideSplash=function(){if(done)return;done=1;setTimeout(function(){var e=document.getElementById('splash');if(e){e.classList.add('out');setTimeout(function(){e.remove()},400)}try{sessionStorage.setItem('pp-splash','1')}catch(x){}},Math.max(0,700-(Date.now()-t0)))};
+/* Splash: tampil langsung saat halaman dibuka, hilang setelah data siap (maks. 3 detik) */
+(function(){var t0=Date.now(),done=0;
+window.hideSplash=function(){if(done)return;done=1;setTimeout(function(){var e=document.getElementById('splash');if(e){e.classList.add('out');setTimeout(function(){e.remove()},400)}},Math.max(0,700-(Date.now()-t0)))};
 setTimeout(window.hideSplash,3000);
 })();
 </script>
@@ -134,13 +132,12 @@ const firebaseConfig = {
 };
 const CFG_OK = !Object.values(firebaseConfig).some(v => v === 'ISI_DI_SINI');
 const FB_READY = CFG_OK && typeof firebase !== 'undefined';
-const DEMO = !CFG_OK; /* config belum diisi: mode demo, data tersimpan di browser ini */
+const DEMO = !CFG_OK; /* config belum diisi: data sementara di browser ini, otomatis nonaktif setelah firebaseConfig diisi */
 const FB_MSG = 'Firebase gagal dimuat. Periksa koneksi internet lalu muat ulang halaman.';
 let db = null, auth = null;
 if (FB_READY) { firebase.initializeApp(firebaseConfig); db = firebase.firestore(); auth = firebase.auth(); }
 else if (DEMO) {
   ({db, auth} = demoFirebase());
-  document.body.insertAdjacentHTML('afterbegin', '<div class="demo">Mode demo: data tersimpan di browser ini. Isi firebaseConfig untuk menyambung ke Firebase.</div>');
 }
 let D = {items: [], loans: []};
 const dbErr = e => toast(e && e.code === 'permission-denied' ? 'Akses ditolak. Cek aturan Firestore' : 'Gagal: ' + ((e && e.message) || 'coba lagi'));
@@ -267,10 +264,10 @@ function render() {
   if (!db) { view.innerHTML = `<p class="empty">${FB_MSG}</p>`; return; }
   if (!ready) { view.innerHTML = '<p class="empty">Memuat…</p>'; return; }
   if (!admin) {
-    view.innerHTML = `<form class="card gate" id="gate"><h3>Masuk admin</h3><label>Email<input type="email" name="email" required autocomplete="username"></label><label>Kata sandi<input type="password" name="pw" required autocomplete="current-password"></label><div class="row"><button class="btn pri">Masuk</button></div>${DEMO ? '<p class="small note">Mode demo: email <b>admin@demo.test</b>, kata sandi <b>admin123</b></p>' : ''}</form>`;
+    view.innerHTML = `<form class="card gate" id="gate"><h3>Masuk admin</h3><label>Email<input type="email" name="email" required autocomplete="username"></label><label>Kata sandi<input type="password" name="pw" required autocomplete="current-password"></label><div class="row"><button class="btn pri">Masuk</button></div></form>`;
     return;
   }
-  tabs.innerHTML = [['req', 'Permintaan'], ['stok', 'Barang'], ['qr', 'Label QR']].map(([k, l]) => `<button data-tab="${k}" aria-pressed="${tab === k}">${l}</button>`).join('') + (DEMO ? '<button data-reset>Reset demo</button>' : '') + '<button data-out>Keluar</button>';
+  tabs.innerHTML = [['req', 'Permintaan'], ['stok', 'Barang'], ['qr', 'Label QR']].map(([k, l]) => `<button data-tab="${k}" aria-pressed="${tab === k}">${l}</button>`).join('') + '<button data-out>Keluar</button>';
   view.innerHTML = views[tab]();
   document.querySelectorAll('[data-qr]').forEach(el => new QRCode(el, {text: el.dataset.qr, width: 120, height: 120, correctLevel: QRCode.CorrectLevel.M}));
 }
