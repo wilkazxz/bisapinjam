@@ -132,6 +132,7 @@ body::before{background:radial-gradient(circle at 10% 8%,rgba(96,165,250,.45),tr
 .btn.pri{background:var(--grad);box-shadow:0 6px 16px rgba(47,124,246,.32)}
 .chips button[aria-pressed="true"],.tabs button[aria-pressed="true"]{background:var(--grad);color:#fff}
 .stats>div:nth-child(1) b{color:#d98a06}.stats>div:nth-child(2) b{color:#2f7cf6}.stats>div:nth-child(3) b{color:#e5484d}.stats>div:nth-child(4) b{color:#0f9f7a}
+.qrbox{display:grid;place-items:center;background:#fff;border-radius:18px;padding:14px;width:fit-content;min-width:200px;min-height:200px;margin:14px auto;color:#0f2a4a;text-align:center}
 </style>
 </head>
 <body>
@@ -251,6 +252,7 @@ const loanInfo = l => {
 /* admin.js: login Firebase Auth (email/kata sandi), data real-time dari Firestore.
    Akun admin = akun Auth yang UID-nya ada di koleksi "admins" (lihat aturan Firestore). */
 /* Akun Firebase untuk admin. Kata sandi akun ini = PIN. Buat di Authentication > Users. */
+const qrUrl = id => location.origin + location.pathname.replace(/[^/]*$/, '') + 'index.html?i=' + encodeURIComponent(id); /* isi QR = tautan, bisa discan kamera HP biasa */
 const ADMIN_EMAIL = 'admin@bisapinjam.com';
 let tab = 'req', filt = 'diajukan', admin = false, ready = false, unsub = [];
 const FILT = [['diajukan', 'Menunggu'], ['disetujui', 'Siap diambil'], ['dipinjam', 'Dipinjam'], ['telat', 'Terlambat'], ['selesai', 'Selesai'], ['ditolak', 'Ditolak'], ['dibatalkan', 'Dibatalkan']];
@@ -290,9 +292,9 @@ const views = {
   stok: () => `<div class="row flush"><button class="btn pri" data-act="baru">+ Tambah barang</button></div>
 <div class="grid">${D.items.length ? D.items.map(i => `<article class="card"><div class="t"><span class="code">${esc(i.id)}</span><span class="note">${esc(i.cat)}</span></div>
 <h3>${esc(i.name)}</h3><p class="note">${esc(i.loc)}, kondisi ${i.cond === 'Baik' ? 'baik' : '<b class="late">' + esc(i.cond.toLowerCase()) + '</b>'}</p><p class="small"><b>${i.stock}</b> tersedia dari ${i.total}${i.stock === 0 ? ' <b class="late">Habis</b>' : ''}</p>
-<div class="row"><button class="btn" data-edit="${esc(i.id)}">Ubah</button><button class="btn bad" data-del="${esc(i.id)}">Hapus</button></div></article>`).join('') : '<p class="empty">Belum ada barang. Tekan "+ Tambah barang" untuk mulai.</p>'}</div>`,
+<div class="row"><button class="btn" data-qrshow="${esc(i.id)}">QR</button><button class="btn" data-edit="${esc(i.id)}">Ubah</button><button class="btn bad" data-del="${esc(i.id)}">Hapus</button></div></article>`).join('') : '<p class="empty">Belum ada barang. Tekan "+ Tambah barang" untuk mulai.</p>'}</div>`,
   qr: () => `<div class="row flush"><button class="btn pri" onclick="print()">Cetak semua label</button></div>
-<div class="qrs">${D.items.map(i => `<div class="lbl"><div class="q" data-qr="PP:${esc(i.id)}"></div><b>${esc(i.name)}</b><span>${esc(i.id)}</span></div>`).join('') || '<p class="empty">Belum ada barang.</p>'}</div>`
+<div class="qrs">${D.items.map(i => `<div class="lbl"><div class="q" data-qr="${esc(qrUrl(i.id))}"></div><b>${esc(i.name)}</b><span>${esc(i.id)}</span></div>`).join('') || '<p class="empty">Belum ada barang.</p>'}</div>`
 };
 
 function render() {
@@ -309,6 +311,11 @@ function render() {
   document.querySelectorAll('[data-qr]').forEach(el => new QRCode(el, {text: el.dataset.qr, width: 200, height: 200, correctLevel: QRCode.CorrectLevel.M}));
 }
 
+function showQr(id) {
+  const i = item(id); if (!i) return;
+  q('#dlgBody').innerHTML = `<h2>${esc(i.name)}</h2><p class="note">${esc(i.id)}. Scan dengan kamera HP biasa atau menu Scan di halaman peminjam.</p><div class="qrbox" id="qrBox"></div><p class="small note" style="word-break:break-all">${esc(qrUrl(id))}</p><div class="row"><button class="btn" data-close>Tutup</button><button class="btn pri" data-copy="${esc(qrUrl(id))}">Salin tautan</button></div>`;
+  q('#dlg').showModal(); new QRCode(q('#qrBox'), {text: qrUrl(id), width: 240, height: 240, correctLevel: QRCode.CorrectLevel.M});
+}
 function itemForm(i) {
   q('#dlgBody').innerHTML = `<h2>${i ? 'Ubah barang' : 'Barang baru'}</h2><form id="itf" data-id="${i ? esc(i.id) : ''}">
 <label>Nama<input name="name" required value="${esc(i?.name)}"></label><label>Kategori<input name="cat" list="catl" required value="${esc(i?.cat)}"><datalist id="catl">${[...new Set(D.items.map(x => x.cat))].map(c => `<option value="${esc(c)}">`).join('')}</datalist></label>
@@ -343,6 +350,8 @@ document.addEventListener('click', e => {
   else if ('reset' in d) { if (confirm('Hapus semua data demo?')) { try { localStorage.removeItem('bisapinjam-demo-fb'); } catch (e) {} location.reload(); } }
   else if (d.filt) { filt = d.filt; render(); }
   else if ('close' in d) closeDlg();
+  else if (d.qrshow) showQr(d.qrshow);
+  else if (d.copy) navigator.clipboard.writeText(d.copy).then(() => toast('Tautan disalin')).catch(() => toast('Gagal menyalin'));
   else if (d.edit) itemForm(item(d.edit));
   else if (d.del) {
     if (D.loans.some(l => l.item === d.del && ['diajukan', 'disetujui', 'dipinjam'].includes(l.status))) return toast('Masih ada pinjaman aktif untuk barang ini');
@@ -391,12 +400,14 @@ document.addEventListener('submit', e => {
   }
 });
 
+let asig = '';
+const snap = () => { const s = JSON.stringify([D.items, D.loans]); if (s === asig) return; asig = s; render(); };
 if (db) auth.onAuthStateChanged(async u => {
-  unsub.forEach(f => f()); unsub = []; admin = false; D = {items: [], loans: []};
+  asig = ''; unsub.forEach(f => f()); unsub = []; admin = false; D = {items: [], loans: []};
   if (u && !u.isAnonymous) {
     try { admin = (await db.collection('admins').doc(u.uid).get()).exists; } catch (e) {}
     if (!admin) { toast('Akun ini bukan admin'); return auth.signOut(); }
-    unsub = [watch('items', a => { D.items = byId(a); render(); }), watch('loans', a => { D.loans = byTs(a); render(); })];
+    unsub = [watch('items', a => { D.items = byId(a); snap(); }), watch('loans', a => { D.loans = byTs(a); snap(); })];
   }
   ready = true; render(); hideSplash();
 });
