@@ -81,6 +81,7 @@ dialog[open]::backdrop{animation:fade .3s}
 /* admin.css: gaya khusus halaman admin */
 .wrap{max-width:900px;margin:0 auto;padding:18px 18px 40px}
 .top{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:14px}
+.brand{display:flex;align-items:center;gap:10px;min-width:0}.logo{width:40px;height:40px;border-radius:12px;object-fit:cover;flex:none;box-shadow:var(--shadow);background:var(--tint)}
 .top h1{font-size:1.4rem;font-weight:800;letter-spacing:-.03em}
 .top a{color:var(--tinttxt);font-weight:600;font-size:.9rem}
 .tabs,.chips{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none}
@@ -109,7 +110,7 @@ dialog[open]::backdrop{animation:fade .3s}
 <body>
 <div id="splash" aria-hidden="true"></div>
 <div class="wrap">
-  <div class="top"><h1>BisaPINJAM Admin</h1><a href="index.html">← Ke halaman peminjam</a></div>
+  <div class="top"><div class="brand"><img class="logo" src="icon.jpg" alt="" onerror="this.remove()"><h1>BisaPINJAM Admin</h1></div><a href="index.html">← Ke halaman peminjam</a></div>
   <div class="tabs" id="tabs"></div>
   <div id="view"></div>
 </div>
