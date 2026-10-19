@@ -3,11 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#2563eb">
+<meta name="theme-color" content="#16a34a">
 <link rel="icon" type="image/jpeg" href="icon.jpg">
 <link rel="apple-touch-icon" href="icon.jpg">
 <link rel="preload" as="image" href="splash.jpg">
-<style>#splash{position:fixed;inset:0;z-index:9999;background:#2563eb url(splash.jpg) center/cover no-repeat;transition:opacity .4s}#splash.out{opacity:0;pointer-events:none}.nosplash #splash{display:none}</style>
+<style>#splash{position:fixed;inset:0;z-index:9999;background:#16a34a url(splash.jpg) center/cover no-repeat;transition:opacity .4s}#splash.out{opacity:0;pointer-events:none}.nosplash #splash{display:none}</style>
 <script>
 /* Splash: tampil langsung saat halaman dibuka, hilang setelah data siap (maks. 3 detik) */
 (function(){var t0=Date.now(),done=0;
@@ -108,6 +108,21 @@ dialog[open]::backdrop{animation:fade .3s}
 .gate{max-width:340px;margin:18vh auto 0}
 @media print{body{background:#fff}body::before{display:none}.wrap>*:not(#view){display:none!important}#view>*:not(.qrs){display:none!important}.qrs{grid-template-columns:repeat(3,1fr)}.lbl{border:1px solid #000}}
 
+
+/* ===== Tema hijau (gaya FreshCart): ubah warna cukup lewat variabel di bawah ===== */
+:root{--ink:#0f172a;--bg:#f5faf7;--sheet:#fff;--soft:#fff;--glass:#fff;--edge:#e4ece7;--line:#e1eae4;--mute:#64796e;--hero:linear-gradient(135deg,#22b85f,#118a43);--dark:#16a34a;--on-dark:#fff;--shadow:0 2px 10px rgba(21,80,45,.07);--tint:#e5f6ec;--tinttxt:#15803d;--ph:#eaf5ee;--ok:#15803d;--red:#dc2626;--warn:#b45309;--page:linear-gradient(180deg,#eef8f2,#fbfefc);--flat:#f1f8f4;--c-wait:#fef3c7;--c-ok:#dcfce7;--c-done:#eceff0;--c-no:#fee2e2}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--ink:#e8f5ee;--bg:#0c1611;--sheet:#101c15;--soft:#15231b;--glass:#15231b;--edge:#23362b;--line:#2a4034;--mute:#8da699;--hero:linear-gradient(135deg,#1d9a52,#0f6b34);--dark:#22a455;--shadow:0 2px 10px rgba(0,0,0,.35);--tint:rgba(74,222,128,.14);--tinttxt:#4ade80;--ph:#1a2b21;--ok:#4ade80;--red:#f87171;--warn:#fbbf24;--page:linear-gradient(180deg,#09120d,#0c1611);--flat:#09120d;--c-wait:rgba(251,191,36,.16);--c-ok:rgba(74,222,128,.16);--c-done:rgba(255,255,255,.08);--c-no:rgba(248,113,113,.16)}}
+body::before{background:var(--page)}
+:focus-visible{outline-color:var(--dark)}
+.card{background:var(--soft);border:1px solid var(--edge);border-radius:18px;box-shadow:var(--shadow)}
+.btn{border-radius:14px;background:var(--soft);border:1px solid var(--edge)}
+.btn.pri{background:var(--dark);color:#fff;border-color:transparent;box-shadow:0 6px 14px rgba(22,163,74,.28)}
+.st{border:0;padding:3px 10px;font-weight:600}
+.st.wait{background:var(--c-wait)}.st.ok{background:var(--c-ok)}.st.done{background:var(--c-done)}.st.no{background:var(--c-no)}
+label input,label select,#kode{background:var(--soft);border:1px solid var(--edge);border-radius:12px}
+.chips button,.tabs button{border-radius:999px;background:var(--soft);border:1px solid var(--edge)}
+.chips button[aria-pressed="true"],.tabs button[aria-pressed="true"]{background:var(--dark);color:#fff;border-color:transparent;box-shadow:none}
+.empty{background:var(--soft);border-color:var(--line)}
 </style>
 </head>
 <body>
