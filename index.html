@@ -249,6 +249,13 @@ body::before{background:radial-gradient(circle at 10% 8%,rgba(96,165,250,.45),tr
 #nav div{box-shadow:0 -6px 22px rgba(47,100,220,.12);background:var(--glass)}
 #nav button[aria-current="true"]::before{background:linear-gradient(90deg,#2f7cf6,#8b5cf6)}
 @media(prefers-color-scheme:dark){.cat:nth-child(5n+2) span{color:#5eead4}.cat:nth-child(5n+3) span{color:#c4b5fd}.cat:nth-child(5n+4) span{color:#fcd34d}.cat:nth-child(5n+5) span{color:#f9a8d4}}
+.qrbox{display:grid;place-items:center;background:#fff;border-radius:18px;padding:14px;width:fit-content;min-width:200px;min-height:200px;margin:14px auto;color:#0f2a4a;text-align:center}
+.pact{display:flex;gap:8px;margin:8px 2px 2px}
+.pact button{flex:1;height:38px;border-radius:12px;font-weight:700;font-size:.8rem;display:inline-flex;align-items:center;justify-content:center;gap:6px;border:1px solid var(--edge);background:var(--soft);color:var(--tinttxt)}
+.pact svg{width:16px;height:16px}
+.pact .addb{background:var(--grad);color:#fff;border-color:transparent;box-shadow:0 4px 10px rgba(47,124,246,.28)}
+.pact .addb:disabled{background:var(--c-done);color:var(--mute);box-shadow:none}
+.pc{contain-intrinsic-size:auto 330px}
 </style>
 </head>
 <body>
@@ -394,7 +401,7 @@ try { me = localStorage.getItem('pp-me') || ''; kelas = localStorage.getItem('pp
 const photo = (src, emo, alt, cls = '') => `<div class="ph ${cls}"><span class="ico">${ic(emo)}</span>${src ? `<img src="${esc(src)}" alt="${esc(alt)}" loading="${cls.includes('eager') ? 'eager' : 'lazy'}" decoding="async" onerror="this.remove()">` : ''}</div>`;
 const card = i => `<article class="pc"><button class="fav" data-fav="${esc(i.id)}" aria-pressed="${favs.has(i.id)}" aria-label="Tandai ${esc(i.name)} sebagai favorit">${ic('heart')}</button>
 <button class="pcb" data-open="${esc(i.id)}">${photo(i.img, EMO[i.cat] || 'box', i.name)}<h4>${esc(i.name)}</h4>
-<div class="meta"><p class="av ${i.stock ? '' : 'none'}">${i.stock ? i.stock + ' tersedia' : 'Stok habis'}</p>${i.stock ? '<span class="go" aria-hidden="true">' + ic('plus') + '</span>' : ''}</div></button></article>`;
+<div class="meta"><p class="av ${i.stock ? '' : 'none'}">${i.stock ? i.stock + ' tersedia' : 'Stok habis'}</p></div></button><div class="pact"><button type="button" data-qrshow="${esc(i.id)}" aria-label="Lihat QR ${esc(i.name)}">${ic('qr')}QR</button><button type="button" class="addb" data-open="${esc(i.id)}" ${i.stock ? '' : 'disabled'}>${ic('plus')}Tambah</button></div></article>`;
 const mineActive = () => D.loans.filter(l => ['diajukan', 'disetujui', 'dipinjam'].includes(l.status));
 const filtered = () => D.items.filter(i => (i.name + i.cat + i.id).toLowerCase().includes(term.toLowerCase()) && (!cat || i.cat === cat) && (!onlyFav || favs.has(i.id)) && (!okOnly || i.stock));
 const gridHtml = l => l.length ? l.map(card).join('') : `<p class="empty">${!D.items.length ? 'Belum ada barang. Admin belum menambahkan stok.' : onlyFav ? 'Belum ada favorit. Ketuk ikon hati pada barang.' : 'Tidak ada barang yang cocok. Coba kata kunci atau kategori lain.'}</p>`;
@@ -445,8 +452,24 @@ const render = keep => {
 const go = t => {
   if (t === 'scan') loadQr().catch(() => {}); const o = ['home', 'barang', 'scan', 'mine']; q('#main').dataset.dir = o.indexOf(t) >= o.indexOf(tab) ? 'r' : 'l'; tab = t; render(); };
 
+const qrUrl = id => location.origin + location.pathname.replace(/[^/]*$/, '') + 'index.html?i=' + encodeURIComponent(id); /* isi QR = tautan, bisa discan kamera HP biasa */
+let qrGen = null;
+const loadQrGen = () => window.QRCode ? Promise.resolve() : (qrGen = qrGen || new Promise((ok, no) => {
+  const el = document.createElement('script'); el.src = 'https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js';
+  el.onload = ok; el.onerror = () => { qrGen = null; no(); }; document.head.appendChild(el);
+}));
+/* kode barang dari hasil scan: tautan (?i=BRG-001), "PP:BRG-001", atau kode biasa */
+const codeOf = raw => { raw = String(raw).trim(); if (/^https?:\/\//i.test(raw)) { try { return (new URL(raw).searchParams.get('i') || '').toUpperCase(); } catch (e) {} } return raw.toUpperCase().replace(/^PP:/, ''); };
+function showQr(id) {
+  const i = item(id); if (!i) return;
+  q('#dlgBody').innerHTML = `<h2>QR ${esc(i.name)}</h2><p class="note">Kode ${esc(i.id)}. Scan dengan kamera HP atau menu Scan, atau pinjam manual dengan tombol Tambah.</p><div class="qrbox" id="qrBox"></div>
+<div class="row"><button class="btn" data-scango>${ic('qr')}Scan QR</button><button class="btn pri" data-pinjam="${esc(i.id)}" ${i.stock ? '' : 'disabled'}>${ic('plus')}Pinjam manual</button></div>
+<div class="row"><button class="btn" data-copy="${esc(qrUrl(i.id))}">Salin tautan</button><button class="btn" data-close>Tutup</button></div>`;
+  q('#dlg').showModal(); if (document.activeElement) document.activeElement.blur();
+  loadQrGen().then(() => { const b = q('#qrBox'); if (b && !b.firstChild) new QRCode(b, {text: qrUrl(i.id), width: 220, height: 220, correctLevel: QRCode.CorrectLevel.M}); }).catch(() => { const b = q('#qrBox'); if (b) b.textContent = 'QR gagal dimuat. Periksa koneksi.'; });
+}
 function borrow(raw) {
-  const i = item(String(raw).trim().toUpperCase().replace(/^PP:/, ''));
+  const i = item(codeOf(raw));
   if (!i) return toast('Kode barang tidak terdaftar');
   if (!i.stock) return toast(i.name + ' sedang habis');
   q('#dlgBody').innerHTML = `${photo(i.img, EMO[i.cat] || 'box', i.name)}<div class="t"><h2>${esc(i.name)}</h2><span class="st ok">${i.stock} tersedia</span></div><p class="note">${esc(i.loc)} · kondisi ${esc(i.cond.toLowerCase())}</p>
@@ -467,6 +490,10 @@ document.addEventListener('click', e => {
   else if (d.tab) { if (d.tab === 'barang') { cat = ''; onlyFav = false; okOnly = false; term = (q('#hq') || {}).value || term; } go(d.tab); }
   else if (d.cancel) { if (confirm('Batalkan pengajuan ini?')) db.collection('loans').doc(d.cancel).update({status: 'dibatalkan'}).then(() => toast('Pengajuan dibatalkan')).catch(dbErr); }
   else if (d.qty) { const n = t.parentElement.querySelector('input'); n.value = Math.min(+n.max || 99, Math.max(1, (+n.value || 1) + +d.qty)); }
+  else if (d.qrshow) showQr(d.qrshow);
+  else if ('scango' in d) { closeDlg(); go('scan'); }
+  else if (d.pinjam) { closeDlg(); borrow(d.pinjam); }
+  else if (d.copy) navigator.clipboard.writeText(d.copy).then(() => toast('Tautan disalin')).catch(() => toast('Gagal menyalin'));
   else if (d.open) borrow(d.open);
   else if (d.fav) { favs.has(d.fav) ? favs.delete(d.fav) : favs.add(d.fav); saveFav(); if (onlyFav && tab === 'barang') return render(true);
     document.querySelectorAll('[data-fav="' + d.fav + '"]').forEach(b => { const on = favs.has(d.fav); b.setAttribute('aria-pressed', on); if (on) { b.classList.remove('pop'); void b.offsetWidth; b.classList.add('pop'); } }); }
@@ -508,7 +535,10 @@ document.addEventListener('submit', e => {
           new Promise((_, no) => setTimeout(() => no({code: 'timeout'}), 15000))
         ]);
         closeDlg(); hist = false; go('mine'); toast('Permintaan terkirim, menunggu admin');
-      } catch (e) { fail(errMsg(e)); }
+      } catch (e) {
+        if (D.loans.some(l => l.id === id)) { closeDlg(); hist = false; go('mine'); return toast('Permintaan sudah terkirim'); }
+        fail(errMsg(e));
+      }
     })();
   }
 });
@@ -532,10 +562,11 @@ const rerender = () => {
   const s = JSON.stringify([D.items, D.loans]); if (s === sig) return; sig = s;
   cancelAnimationFrame(rq); rq = requestAnimationFrame(() => render(true));
 };
+let deep = new URLSearchParams(location.search).get('i') || '';
 if (!db) q('#main').innerHTML = `<p class="empty">${FB_MSG}</p>`;
 else {
   render();
-  watch('items', a => { D.items = byId(a); ready = true; rerender(); hideSplash(); }, null, () => { hideSplash(); q('#main').innerHTML = '<p class="empty">Gagal memuat data barang. Cek aturan Firestore dan koneksi internet.</p>'; });
+  watch('items', a => { D.items = byId(a); ready = true; rerender(); hideSplash(); if (deep) { const c = deep; deep = ''; setTimeout(() => { borrow(c); try { history.replaceState(null, '', location.pathname); } catch (e) {} }, 400); } }, null, () => { hideSplash(); q('#main').innerHTML = '<p class="empty">Gagal memuat data barang. Cek aturan Firestore dan koneksi internet.</p>'; });
   let unLoans = null, seen = null;
   const MSG = {disetujui: 'disetujui, silakan ambil barang', ditolak: 'ditolak', dipinjam: 'barang sudah diserahkan', selesai: 'pengembalian dicatat'};
   auth.onAuthStateChanged(u => {
