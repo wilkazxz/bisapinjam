@@ -240,6 +240,8 @@ const loanInfo = l => {
 <script>
 /* admin.js: login Firebase Auth (email/kata sandi), data real-time dari Firestore.
    Akun admin = akun Auth yang UID-nya ada di koleksi "admins" (lihat aturan Firestore). */
+/* Akun Firebase untuk admin. Kata sandi akun ini = PIN. Buat di Authentication > Users. */
+const ADMIN_EMAIL = 'admin@bisapinjam.com';
 let tab = 'req', filt = 'diajukan', admin = false, ready = false, unsub = [];
 const FILT = [['diajukan', 'Menunggu'], ['disetujui', 'Siap diambil'], ['dipinjam', 'Dipinjam'], ['telat', 'Terlambat'], ['selesai', 'Selesai'], ['ditolak', 'Ditolak'], ['dibatalkan', 'Dibatalkan']];
 
@@ -289,7 +291,7 @@ function render() {
   if (!db) { view.innerHTML = `<p class="empty">${FB_MSG}</p>`; return; }
   if (!ready) { view.innerHTML = '<p class="empty">Memuat…</p>'; return; }
   if (!admin) {
-    view.innerHTML = `<form class="card gate" id="gate"><h3>Masuk admin</h3><label>Email<input type="email" name="email" required autocomplete="username"></label><label>Kata sandi<input type="password" name="pw" required autocomplete="current-password"></label><div class="row"><button class="btn pri">Masuk</button></div></form>`;
+    view.innerHTML = `<form class="card gate" id="gate"><h3>Masuk admin</h3><label>PIN<input type="password" name="pin" inputmode="numeric" pattern="[0-9]*" minlength="6" maxlength="6" required autocomplete="off" placeholder="Masukkan 6 digit PIN" style="text-align:center;letter-spacing:.4em"></label><div class="row"><button class="btn pri">Masuk</button></div></form>`;
     return;
   }
   tabs.innerHTML = [['req', 'Permintaan'], ['stok', 'Barang'], ['qr', 'Label QR']].map(([k, l]) => `<button data-tab="${k}" aria-pressed="${tab === k}">${l}</button>`).join('') + '<button data-out>Keluar</button>';
@@ -361,7 +363,7 @@ document.addEventListener('input', e => { if (e.target.id === 'aq') { aterm = e.
 document.addEventListener('submit', e => {
   e.preventDefault();
   const f = e.target, v = Object.fromEntries(new FormData(f));
-  if (f.id === 'gate') auth.signInWithEmailAndPassword(v.email.trim(), v.pw).catch(() => toast('Gagal masuk: email atau kata sandi salah'));
+  if (f.id === 'gate') auth.signInWithEmailAndPassword(ADMIN_EMAIL, v.pin.trim()).catch(e => toast(e && e.code === 'auth/too-many-requests' ? 'Terlalu banyak percobaan, coba lagi nanti' : 'PIN salah'));
   else if (f.id === 'rf') giveBack(f.dataset.id, v.cond);
   else if (f.id === 'nf') { closeDlg(); setLoan(f.dataset.id, {status: 'ditolak', note: v.note.trim()}, 'Pinjaman ditolak'); }
   else if (f.id === 'itf') {
