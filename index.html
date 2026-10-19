@@ -3,11 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#16a34a">
+<meta name="theme-color" content="#2f7cf6">
 <link rel="icon" type="image/jpeg" href="icon.jpg">
 <link rel="apple-touch-icon" href="icon.jpg">
 <link rel="preload" as="image" href="splash.jpg">
-<style>#splash{position:fixed;inset:0;z-index:9999;background:#16a34a url(splash.jpg) center/cover no-repeat;transition:opacity .4s}#splash.out{opacity:0;pointer-events:none}.nosplash #splash{display:none}</style>
+<style>#splash{position:fixed;inset:0;z-index:9999;background:#2f7cf6 url(splash.jpg) center/cover no-repeat;transition:opacity .4s}#splash.out{opacity:0;pointer-events:none}.nosplash #splash{display:none}</style>
 <script>
 /* Splash: tampil langsung saat halaman dibuka, hilang setelah data siap (maks. 3 detik) */
 (function(){var t0=Date.now(),done=0;
@@ -223,6 +223,32 @@ label input,label select,#kode{background:var(--soft);border:1px solid var(--edg
 .qty button{width:50px;border:1px solid var(--edge);border-radius:12px;background:var(--soft);font-size:1.4rem;font-weight:700;color:var(--dark)}
 #bferr:empty{display:none}#bferr{background:var(--c-no);padding:8px 12px;border-radius:10px;font-weight:600}
 .btn:disabled{opacity:.7}
+
+/* ===== Tema biru kaca: soft, cerah, bersih + aksen warna lain (ubah lewat variabel) ===== */
+:root{--ink:#0f2a4a;--bg:rgba(255,255,255,.38);--sheet:rgba(255,255,255,.97);--soft:linear-gradient(180deg,rgba(255,255,255,.96),rgba(255,255,255,.74));--glass:rgba(255,255,255,.9);--edge:rgba(150,185,240,.38);--line:rgba(59,130,246,.18);--mute:#5b7391;--hero:linear-gradient(135deg,#5aa2ff,#2f6bf0 58%,#8b6cf6);--dark:#2f7cf6;--on-dark:#fff;--shadow:0 4px 18px rgba(47,100,220,.12);--tint:rgba(47,124,246,.12);--tinttxt:#1d5fd6;--ph:rgba(47,124,246,.08);--ok:#0f9f7a;--red:#e5484d;--warn:#c2760a;--page:linear-gradient(160deg,#e6f1ff,#f6faff 45%,#e9f0ff);--flat:#eaf3ff;--c-wait:#fff1cf;--c-ok:#d8f6ec;--c-done:#e8eef7;--c-no:#ffe0e2;--grad:linear-gradient(135deg,#5aa2ff,#2f6bf0)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--ink:#e6f0ff;--bg:rgba(15,26,48,.5);--sheet:rgba(16,28,52,.98);--soft:linear-gradient(180deg,rgba(255,255,255,.11),rgba(255,255,255,.05));--glass:rgba(22,36,64,.92);--edge:rgba(147,185,255,.2);--line:rgba(147,185,255,.22);--mute:#9bb2d4;--hero:linear-gradient(135deg,#3b82f6,#2d5fd6 58%,#6d5ce8);--dark:#4f93ff;--shadow:0 4px 18px rgba(0,0,0,.35);--tint:rgba(96,165,250,.16);--tinttxt:#9cc2ff;--ph:rgba(255,255,255,.06);--ok:#34d3b0;--red:#ff8a7a;--warn:#ffc83d;--page:linear-gradient(160deg,#0a1426,#0f2144 50%,#0a1830);--flat:#0a1426;--c-wait:rgba(255,200,61,.16);--c-ok:rgba(52,211,176,.16);--c-done:rgba(255,255,255,.08);--c-no:rgba(255,138,122,.16)}}
+body::before{background:radial-gradient(circle at 10% 8%,rgba(96,165,250,.45),transparent 42%),radial-gradient(circle at 92% 28%,rgba(167,139,250,.32),transparent 45%),radial-gradient(circle at 18% 96%,rgba(45,212,191,.26),transparent 45%),radial-gradient(circle at 88% 90%,rgba(251,191,146,.28),transparent 40%),var(--page)}
+.card,.pc,.search,.ibtn{box-shadow:var(--shadow),inset 0 1px 0 rgba(255,255,255,.7)}
+.btn.pri{background:var(--grad);box-shadow:0 6px 16px rgba(47,124,246,.32)}
+.chips button[aria-pressed="true"],.tabs button[aria-pressed="true"]{background:var(--grad);color:#fff}
+.stats>div:nth-child(1) b{color:#d98a06}.stats>div:nth-child(2) b{color:#2f7cf6}.stats>div:nth-child(3) b{color:#e5484d}.stats>div:nth-child(4) b{color:#0f9f7a}
+/* ----- halaman peminjam (biru kaca) ----- */
+.word{background:linear-gradient(90deg,#2f7cf6,#8b5cf6);-webkit-background-clip:text;background-clip:text;color:transparent}
+.flt{background:var(--grad)}
+.toggle button[aria-pressed="true"]{background:var(--grad)}
+.hero{box-shadow:0 10px 24px rgba(47,100,220,.28)}
+.hero::after{content:"";position:absolute;left:-30px;bottom:-60px;width:150px;height:150px;border-radius:50%;background:rgba(45,212,191,.28)}
+.dark{color:#2563eb}
+.sec button{color:var(--dark)}
+.cat:nth-child(5n+2) span{background:rgba(20,184,166,.14);color:#0f9f90}
+.cat:nth-child(5n+3) span{background:rgba(139,92,246,.14);color:#7c4de0}
+.cat:nth-child(5n+4) span{background:rgba(245,158,11,.16);color:#c2760a}
+.cat:nth-child(5n+5) span{background:rgba(236,72,153,.13);color:#d6347f}
+.go{background:var(--grad)}
+.fav[aria-pressed="true"]{color:#ec4899}
+#nav div{box-shadow:0 -6px 22px rgba(47,100,220,.12);background:var(--glass)}
+#nav button[aria-current="true"]::before{background:linear-gradient(90deg,#2f7cf6,#8b5cf6)}
+@media(prefers-color-scheme:dark){.cat:nth-child(5n+2) span{color:#5eead4}.cat:nth-child(5n+3) span{color:#c4b5fd}.cat:nth-child(5n+4) span{color:#fcd34d}.cat:nth-child(5n+5) span{color:#f9a8d4}}
 </style>
 </head>
 <body>
