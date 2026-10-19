@@ -3,11 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#2563eb">
+<meta name="theme-color" content="#16a34a">
 <link rel="icon" type="image/jpeg" href="icon.jpg">
 <link rel="apple-touch-icon" href="icon.jpg">
 <link rel="preload" as="image" href="splash.jpg">
-<style>#splash{position:fixed;inset:0;z-index:9999;background:#2563eb url(splash.jpg) center/cover no-repeat;transition:opacity .4s}#splash.out{opacity:0;pointer-events:none}.nosplash #splash{display:none}</style>
+<style>#splash{position:fixed;inset:0;z-index:9999;background:#16a34a url(splash.jpg) center/cover no-repeat;transition:opacity .4s}#splash.out{opacity:0;pointer-events:none}.nosplash #splash{display:none}</style>
 <script>
 /* Splash: tampil langsung saat halaman dibuka, hilang setelah data siap (maks. 3 detik) */
 (function(){var t0=Date.now(),done=0;
@@ -162,6 +162,61 @@ dialog[open]::backdrop{animation:fade .3s}
 @keyframes pulse{50%{opacity:.45}}
 .fav.pop svg{animation:pop .4s}
 
+
+/* ===== Tema hijau (gaya FreshCart): ubah warna cukup lewat variabel di bawah ===== */
+:root{--ink:#0f172a;--bg:#f5faf7;--sheet:#fff;--soft:#fff;--glass:#fff;--edge:#e4ece7;--line:#e1eae4;--mute:#64796e;--hero:linear-gradient(135deg,#22b85f,#118a43);--dark:#16a34a;--on-dark:#fff;--shadow:0 2px 10px rgba(21,80,45,.07);--tint:#e5f6ec;--tinttxt:#15803d;--ph:#eaf5ee;--ok:#15803d;--red:#dc2626;--warn:#b45309;--page:linear-gradient(180deg,#eef8f2,#fbfefc);--flat:#f1f8f4;--c-wait:#fef3c7;--c-ok:#dcfce7;--c-done:#eceff0;--c-no:#fee2e2}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--ink:#e8f5ee;--bg:#0c1611;--sheet:#101c15;--soft:#15231b;--glass:#15231b;--edge:#23362b;--line:#2a4034;--mute:#8da699;--hero:linear-gradient(135deg,#1d9a52,#0f6b34);--dark:#22a455;--shadow:0 2px 10px rgba(0,0,0,.35);--tint:rgba(74,222,128,.14);--tinttxt:#4ade80;--ph:#1a2b21;--ok:#4ade80;--red:#f87171;--warn:#fbbf24;--page:linear-gradient(180deg,#09120d,#0c1611);--flat:#09120d;--c-wait:rgba(251,191,36,.16);--c-ok:rgba(74,222,128,.16);--c-done:rgba(255,255,255,.08);--c-no:rgba(248,113,113,.16)}}
+body::before{background:var(--page)}
+:focus-visible{outline-color:var(--dark)}
+.card{background:var(--soft);border:1px solid var(--edge);border-radius:18px;box-shadow:var(--shadow)}
+.btn{border-radius:14px;background:var(--soft);border:1px solid var(--edge)}
+.btn.pri{background:var(--dark);color:#fff;border-color:transparent;box-shadow:0 6px 14px rgba(22,163,74,.28)}
+.st{border:0;padding:3px 10px;font-weight:600}
+.st.wait{background:var(--c-wait)}.st.ok{background:var(--c-ok)}.st.done{background:var(--c-done)}.st.no{background:var(--c-no)}
+label input,label select,#kode{background:var(--soft);border:1px solid var(--edge);border-radius:12px}
+.chips button,.tabs button{border-radius:999px;background:var(--soft);border:1px solid var(--edge)}
+.chips button[aria-pressed="true"],.tabs button[aria-pressed="true"]{background:var(--dark);color:#fff;border-color:transparent;box-shadow:none}
+.empty{background:var(--soft);border-color:var(--line)}
+/* ----- halaman peminjam ----- */
+.app{background:var(--bg);padding-bottom:104px}
+.word{color:var(--dark)}
+.ibtn{background:var(--soft);box-shadow:var(--shadow)}
+.search{background:var(--soft);border-radius:14px;height:48px;box-shadow:none}
+.search>svg{color:var(--dark)}
+.flt{width:36px;height:36px;border-radius:11px;background:var(--dark);color:#fff;border:0}
+.toggle button{border-radius:999px;height:42px;background:var(--soft)}
+.toggle button[aria-pressed="true"]{background:var(--dark);color:#fff;box-shadow:none}
+.hero{position:relative;border:0;color:#fff;box-shadow:0 8px 20px rgba(22,163,74,.22)}
+.hero::before{content:"";position:absolute;right:-40px;top:-50px;width:180px;height:180px;border-radius:50%;background:rgba(255,255,255,.12)}
+.hero>*{position:relative}
+.hero h2{color:#fff;font-size:1.3rem}
+.hero p{color:rgba(255,255,255,.88)}
+.hero .pill{background:rgba(255,255,255,.22);color:#fff}
+.hero .ph .ico{color:#fff}
+.dark{background:#fff;color:#15803d;border:0;box-shadow:none;border-radius:12px;min-height:42px}
+.sec h3{font-size:1.1rem}
+.sec button{color:var(--dark);text-decoration:none;font-weight:700}
+.cat{font-size:.76rem;font-weight:600}
+.cat span{width:58px;height:58px;border-radius:18px;background:var(--tint);color:var(--tinttxt);border:0;box-shadow:none}
+.pc{background:var(--soft);border:1px solid var(--edge);border-radius:18px;padding:8px;box-shadow:var(--shadow);contain-intrinsic-size:auto 280px}
+.pcb .ph{aspect-ratio:1;border-radius:14px}
+.pcb h4{margin:10px 4px 4px;font-size:.88rem;min-height:2.6em}
+.meta{margin:4px 4px 2px}
+.av{font-size:.78rem}
+.go{width:34px;height:34px;padding:0;border-radius:50%;display:grid;place-items:center;background:var(--dark);box-shadow:none}
+.go svg{width:18px;height:18px;stroke-width:2.4}
+.fav{top:14px;right:14px;width:34px;height:34px;background:var(--soft);box-shadow:var(--shadow)}
+#nav{padding:0}
+#nav div{width:100%;max-width:460px;gap:0;justify-content:space-around;border-radius:20px 20px 0 0;border-width:1px 1px 0;padding:8px 6px calc(8px + env(safe-area-inset-bottom,0px));box-shadow:0 -4px 18px rgba(15,60,35,.08)}
+#nav button{flex:1;flex-direction:column;gap:2px;height:56px;min-width:0;padding:0;border-radius:14px;position:relative}
+#nav svg{width:22px;height:22px}
+#nav span{max-width:none;opacity:1;margin:0;font-size:.7rem;font-weight:600}
+#nav button[aria-current="true"]{background:none;color:var(--dark);box-shadow:none}
+#nav button[aria-current="true"] span{max-width:none;margin:0}
+#nav button[aria-current="true"]::before{content:"";position:absolute;top:-8px;width:26px;height:3px;border-radius:0 0 3px 3px;background:var(--dark)}
+#toast{bottom:calc(84px + env(safe-area-inset-bottom,0px))}
+.sheet .ph{height:200px;border-radius:18px}
+#reader{border-radius:18px;overflow:hidden}
 </style>
 </head>
 <body>
@@ -279,6 +334,7 @@ const P = {
   qr: '<rect x="3" y="3" width="6" height="6" rx="1"/><rect x="15" y="3" width="6" height="6" rx="1"/><rect x="3" y="15" width="6" height="6" rx="1"/><path d="M15 15h2v2h-2zM19 19h2M15 20h2M20 15v2"/>',
   bag: '<path d="M6 7h12l1 13H5z"/><path d="M9 7a3 3 0 0 1 6 0"/>',
   heart: '<path d="M12 21s-8-5.2-8-11a4.5 4.5 0 0 1 8-2.8A4.5 4.5 0 0 1 20 10c0 5.8-8 11-8 11z"/>',
+  plus: '<path d="M12 5v14M5 12h14"/>',
   back: '<path d="M15 5l-7 7 7 7"/>',
   search: '<circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/>',
   sliders: '<path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/>',
@@ -299,7 +355,7 @@ try { me = localStorage.getItem('pp-me') || ''; kelas = localStorage.getItem('pp
 const photo = (src, emo, alt, cls = '') => `<div class="ph ${cls}"><span class="ico">${ic(emo)}</span>${src ? `<img src="${esc(src)}" alt="${esc(alt)}" loading="${cls.includes('eager') ? 'eager' : 'lazy'}" decoding="async" onerror="this.remove()">` : ''}</div>`;
 const card = i => `<article class="pc"><button class="fav" data-fav="${esc(i.id)}" aria-pressed="${favs.has(i.id)}" aria-label="Tandai ${esc(i.name)} sebagai favorit">${ic('heart')}</button>
 <button class="pcb" data-open="${esc(i.id)}">${photo(i.img, EMO[i.cat] || 'box', i.name)}<h4>${esc(i.name)}</h4>
-<div class="meta"><p class="av ${i.stock ? '' : 'none'}">${i.stock ? i.stock + ' tersedia' : 'Stok habis'}</p>${i.stock ? '<span class="go">Pinjam</span>' : ''}</div></button></article>`;
+<div class="meta"><p class="av ${i.stock ? '' : 'none'}">${i.stock ? i.stock + ' tersedia' : 'Stok habis'}</p>${i.stock ? '<span class="go" aria-hidden="true">' + ic('plus') + '</span>' : ''}</div></button></article>`;
 const mineActive = () => D.loans.filter(l => ['diajukan', 'disetujui', 'dipinjam'].includes(l.status));
 const filtered = () => D.items.filter(i => (i.name + i.cat + i.id).toLowerCase().includes(term.toLowerCase()) && (!cat || i.cat === cat) && (!onlyFav || favs.has(i.id)) && (!okOnly || i.stock));
 const gridHtml = l => l.length ? l.map(card).join('') : `<p class="empty">${!D.items.length ? 'Belum ada barang. Admin belum menambahkan stok.' : onlyFav ? 'Belum ada favorit. Ketuk ikon hati pada barang.' : 'Tidak ada barang yang cocok. Coba kata kunci atau kategori lain.'}</p>`;
