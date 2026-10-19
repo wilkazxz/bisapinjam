@@ -4,8 +4,20 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#2563eb">
+<link rel="icon" type="image/jpeg" href="icon.jpg">
+<link rel="apple-touch-icon" href="icon.jpg">
+<link rel="preload" as="image" href="splash.jpg">
+<style>#splash{position:fixed;inset:0;z-index:9999;background:#2563eb url(splash.jpg) center/cover no-repeat;transition:opacity .4s}#splash.out{opacity:0;pointer-events:none}.nosplash #splash{display:none}</style>
+<script>
+/* Splash: tampil langsung saat pertama buka (sekali per sesi), hilang setelah data siap */
+(function(){var s=0;try{s=sessionStorage.getItem('pp-splash')}catch(e){}
+if(s){document.documentElement.className+=' nosplash';window.hideSplash=function(){};return}
+var t0=Date.now(),done=0;
+window.hideSplash=function(){if(done)return;done=1;setTimeout(function(){var e=document.getElementById('splash');if(e){e.classList.add('out');setTimeout(function(){e.remove()},400)}try{sessionStorage.setItem('pp-splash','1')}catch(x){}},Math.max(0,700-(Date.now()-t0)))};
+setTimeout(window.hideSplash,3000);
+})();
+</script>
 <title>BisaPINJAM: pinjam barang dengan QR</title>
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='24' fill='%232563eb'/><path d='M28 30h26l22 22-22 22H28z' fill='white'/></svg>">
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 /* style.css: gaya bersama (tema, komponen dasar) untuk index.html dan admin.html */
@@ -150,6 +162,7 @@ dialog[open]::backdrop{animation:fade .3s}
 </style>
 </head>
 <body>
+<div id="splash" aria-hidden="true"></div>
 <div class="app"><main id="main"></main></div>
 <nav id="nav" aria-label="Menu utama"><div></div></nav>
 <dialog id="dlg"><div class="sheet" id="dlgBody"></div></dialog>
@@ -397,7 +410,7 @@ const rerender = () => { if (!ready || tab === 'scan' || (document.activeElement
 if (!db) q('#main').innerHTML = `<p class="empty">${FB_MSG}</p>`;
 else {
   render();
-  watch('items', a => { D.items = byId(a); ready = true; rerender(); }, null, () => { q('#main').innerHTML = '<p class="empty">Gagal memuat data barang. Cek aturan Firestore dan koneksi internet.</p>'; });
+  watch('items', a => { D.items = byId(a); ready = true; rerender(); hideSplash(); }, null, () => { hideSplash(); q('#main').innerHTML = '<p class="empty">Gagal memuat data barang. Cek aturan Firestore dan koneksi internet.</p>'; });
   let unLoans = null, seen = null;
   const MSG = {disetujui: 'disetujui, silakan ambil barang', ditolak: 'ditolak', dipinjam: 'barang sudah diserahkan', selesai: 'pengembalian dicatat'};
   auth.onAuthStateChanged(u => {
