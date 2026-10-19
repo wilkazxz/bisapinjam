@@ -18,7 +18,7 @@ setTimeout(window.hideSplash,3000);
 <title>BisaPINJAM Admin</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://www.gstatic.com">
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 /* style.css: gaya bersama (tema, komponen dasar) untuk index.html dan admin.html */
@@ -139,6 +139,12 @@ label input,label select,#kode{background:var(--soft);border:1px solid var(--edg
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script>
+/* Cadangan: kalau gstatic terblokir (VPN, adblock, jaringan), muat Firebase dari jsDelivr */
+(function(){var B='https://cdn.jsdelivr.net/npm/firebase@10.12.2/',h=window.firebase;
+function w(f){document.write('<script src="'+B+f+'-compat.js"><\/script>')}
+if(!h)w('firebase-app');if(!h||!h.auth)w('firebase-auth');if(!h||!h.firestore)w('firebase-firestore');})();
+</script>
 <script>
 /* Helper + lapisan data Firebase. Bagian ini sama di index.html dan admin.html. */
 /* Data: Firebase (Firestore + Auth). Isi firebaseConfig dari Firebase Console
