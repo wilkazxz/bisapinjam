@@ -217,6 +217,12 @@ label input,label select,#kode{background:var(--soft);border:1px solid var(--edg
 #toast{bottom:calc(84px + env(safe-area-inset-bottom,0px))}
 .sheet .ph{height:200px;border-radius:18px}
 #reader{border-radius:18px;overflow:hidden}
+.sheet .t{align-items:flex-start;gap:10px}.sheet .t .st{flex:none;margin-top:4px}
+.sheet label{color:var(--mute);font-size:.82rem}.sheet label input,.sheet label select{color:var(--ink)}
+.qty{display:flex;gap:8px;margin-top:4px}.qty input{margin:0;text-align:center;flex:1;font-weight:700;-moz-appearance:textfield}.qty input::-webkit-inner-spin-button,.qty input::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+.qty button{width:50px;border:1px solid var(--edge);border-radius:12px;background:var(--soft);font-size:1.4rem;font-weight:700;color:var(--dark)}
+#bferr:empty{display:none}#bferr{background:var(--c-no);padding:8px 12px;border-radius:10px;font-weight:600}
+.btn:disabled{opacity:.7}
 </style>
 </head>
 <body>
@@ -255,7 +261,8 @@ else if (DEMO) {
   ({db, auth} = demoFirebase());
 }
 let D = {items: [], loans: []};
-const dbErr = e => toast(e && e.code === 'permission-denied' ? 'Akses ditolak. Cek aturan Firestore' : 'Gagal: ' + ((e && e.message) || 'coba lagi'));
+const errMsg = e => { const c = (e && e.code) || ''; return c === 'permission-denied' ? 'Akses ditolak. Cek Rules Firestore sudah di-Publish' : /operation-not-allowed|admin-restricted/.test(c) ? 'Login Anonymous belum diaktifkan di Firebase Authentication' : c === 'auth/unauthorized-domain' ? 'Domain web ini belum diizinkan di Firebase (Authorized domains)' : (c === 'timeout' || c === 'unavailable') ? 'Tidak bisa terhubung ke server. Cek internet, matikan VPN atau ad-blocker' : 'Gagal: ' + ((e && e.message) || 'coba lagi'); };
+const dbErr = e => toast(errMsg(e));
 const watch = (name, cb, where, fail) => { let r = db.collection(name); if (where) r = r.where(...where); return r.onSnapshot(s => cb(s.docs.map(d => d.data())), e => { dbErr(e); if (fail) fail(e); }); };
 const byTs = a => a.sort((x, y) => (x.ts || 0) - (y.ts || 0));
 const byId = a => a.sort((x, y) => x.id.localeCompare(y.id));
@@ -314,7 +321,7 @@ const today = () => ymd(new Date());
 const addDays = n => ymd(new Date(Date.now() + n * 864e5));
 const fmt = d => d ? new Date(d + 'T00:00').toLocaleDateString('id-ID', {day:'numeric', month:'short'}) : '-';
 const item = id => D.items.find(i => i.id === id);
-const toast = m => { const t = q('#toast'); t.textContent = m; t.classList.add('on'); clearTimeout(toast.t); toast.t = setTimeout(() => t.classList.remove('on'), 2400); };
+const toast = m => { const t = q('#toast'), d = q('#dlg'); (d.open ? d : document.body).appendChild(t); /* agar tampil di atas dialog */ t.textContent = m; t.classList.add('on'); clearTimeout(toast.t); toast.t = setTimeout(() => t.classList.remove('on'), Math.max(2400, m.length * 70)); };
 const closeDlg = () => q('#dlg').close();
 q('#dlg').addEventListener('click', e => { if (e.target.id === 'dlg') closeDlg(); });
 
@@ -416,14 +423,15 @@ function borrow(raw) {
   const i = item(String(raw).trim().toUpperCase().replace(/^PP:/, ''));
   if (!i) return toast('Kode barang tidak terdaftar');
   if (!i.stock) return toast(i.name + ' sedang habis');
-  q('#dlgBody').innerHTML = `${photo(i.img, EMO[i.cat] || 'box', i.name)}<h2>${esc(i.name)}</h2><p class="note">${i.stock} tersedia di ${esc(i.loc)}, kondisi ${esc(i.cond.toLowerCase())}</p>
-<form id="bf" data-id="${esc(i.id)}"><label>Nama peminjam<input name="who" required value="${esc(me)}"></label>
+  q('#dlgBody').innerHTML = `${photo(i.img, EMO[i.cat] || 'box', i.name)}<div class="t"><h2>${esc(i.name)}</h2><span class="st ok">${i.stock} tersedia</span></div><p class="note">${esc(i.loc)} · kondisi ${esc(i.cond.toLowerCase())}</p>
+<form id="bf" data-id="${esc(i.id)}"><label>Nama peminjam<input name="who" required autocomplete="name" value="${esc(me)}"></label>
 <label>Kelas<input name="kelas" required value="${esc(kelas)}" placeholder="Contoh: XI TKJ 1"></label>
-<label>Jumlah<input name="qty" type="number" min="1" max="${i.stock}" value="1" required></label>
+<label>Jumlah<div class="qty"><button type="button" data-qty="-1" aria-label="Kurangi">−</button><input name="qty" type="number" min="1" max="${i.stock}" value="1" required inputmode="numeric"><button type="button" data-qty="1" aria-label="Tambah">+</button></div></label>
 <label>Tujuan<input name="purpose" required placeholder="Contoh: praktik jaringan kelas XI"></label>
 <label>Rencana kembali (maks. 14 hari)<input name="due" type="date" min="${today()}" max="${addDays(14)}" value="${addDays(3)}" required></label>
-<div class="row"><button type="button" class="btn" data-close>Batal</button><button class="btn pri">Ajukan peminjaman</button></div></form>`;
-  q('#dlg').showModal();
+<p class="small late" id="bferr" role="alert"></p>
+<div class="row"><button type="button" class="btn" data-close>Batal</button><button class="btn pri" id="bsub">Ajukan peminjaman</button></div></form>`;
+  q('#dlg').showModal(); if (document.activeElement) document.activeElement.blur();
 }
 
 document.addEventListener('click', e => {
@@ -432,6 +440,7 @@ document.addEventListener('click', e => {
   if (d.tab && d.tab === tab && t.closest('#nav')) scrollTo({top: 0, behavior: 'smooth'});
   else if (d.tab) { if (d.tab === 'barang') { cat = ''; onlyFav = false; okOnly = false; term = (q('#hq') || {}).value || term; } go(d.tab); }
   else if (d.cancel) { if (confirm('Batalkan pengajuan ini?')) db.collection('loans').doc(d.cancel).update({status: 'dibatalkan'}).then(() => toast('Pengajuan dibatalkan')).catch(dbErr); }
+  else if (d.qty) { const n = t.parentElement.querySelector('input'); n.value = Math.min(+n.max || 99, Math.max(1, (+n.value || 1) + +d.qty)); }
   else if (d.open) borrow(d.open);
   else if (d.fav) { favs.has(d.fav) ? favs.delete(d.fav) : favs.add(d.fav); saveFav(); if (onlyFav && tab === 'barang') return render(true);
     document.querySelectorAll('[data-fav="' + d.fav + '"]').forEach(b => { const on = favs.has(d.fav); b.setAttribute('aria-pressed', on); if (on) { b.classList.remove('pop'); void b.offsetWidth; b.classList.add('pop'); } }); }
@@ -455,14 +464,26 @@ document.addEventListener('submit', e => {
   else if (f.id === 'bs') {}
   else if (f.id === 'manual') borrow(v.kode);
   else if (f.id === 'bf') {
-    const i = item(f.dataset.id), n = +v.qty;
-    if (!i || n < 1 || n > i.stock) return toast('Jumlah melebihi stok tersedia');
+    const i = item(f.dataset.id), n = Math.floor(+v.qty), err = q('#bferr'), sb = q('#bsub');
+    const fail = m => { err.textContent = m; sb.disabled = false; sb.textContent = 'Ajukan peminjaman'; };
+    err.textContent = '';
+    if (!i || !(n >= 1)) return fail('Jumlah tidak valid');
+    if (n > i.stock) return fail('Jumlah melebihi stok tersedia (' + i.stock + ')');
+    if (v.due < today() || v.due > addDays(14)) return fail('Tanggal kembali maksimal 14 hari dari hari ini');
     me = v.who.trim(); kelas = v.kelas.trim(); try { localStorage.setItem('pp-me', me); localStorage.setItem('pp-kelas', kelas); } catch (x) {}
-    if (!auth.currentUser) return toast('Belum tersambung. Coba lagi sebentar');
-    const id = 'TRX-' + Math.random().toString(36).slice(2, 7).toUpperCase();
-    const sb = f.querySelector('.pri'); sb.disabled = true;
-    db.collection('loans').doc(id).set({id, item: i.id, qty: n, who: me, kelas, purpose: v.purpose.trim(), date: today(), due: v.due, status: 'diajukan', uid: auth.currentUser.uid, ts: Date.now()})
-      .then(() => { closeDlg(); hist = false; go('mine'); toast('Permintaan terkirim, menunggu admin'); }).catch(e => { sb.disabled = false; dbErr(e); });
+    const id = f.dataset.trx = f.dataset.trx || 'TRX-' + Math.random().toString(36).slice(2, 7).toUpperCase(); /* id sama saat coba ulang, tidak dobel */
+    sb.disabled = true; sb.textContent = 'Mengirim…';
+    (async () => {
+      try {
+        if (!auth.currentUser) await auth.signInAnonymously();
+        const u = auth.currentUser; if (!u) throw {code: 'unavailable'};
+        await Promise.race([
+          db.collection('loans').doc(id).set({id, item: i.id, qty: n, who: me, kelas, purpose: v.purpose.trim(), date: today(), due: v.due, status: 'diajukan', uid: u.uid, ts: Date.now()}),
+          new Promise((_, no) => setTimeout(() => no({code: 'timeout'}), 15000))
+        ]);
+        closeDlg(); hist = false; go('mine'); toast('Permintaan terkirim, menunggu admin');
+      } catch (e) { fail(errMsg(e)); }
+    })();
   }
 });
 
