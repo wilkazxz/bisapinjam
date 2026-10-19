@@ -1,0 +1,359 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#2563eb">
+<title>BisaPINJAM Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* style.css: gaya bersama (tema, komponen dasar) untuk index.html dan admin.html */
+:root{--ink:#0e2747;--bg:rgba(255,255,255,.42);--sheet:rgba(255,255,255,.86);--soft:rgba(255,255,255,.62);--glass:rgba(255,255,255,.62);--edge:rgba(255,255,255,.85);--line:rgba(37,99,235,.18);--mute:#587291;--hero:linear-gradient(135deg,rgba(184,210,255,.9),rgba(238,244,255,.85));--dark:#2563eb;--on-dark:#fff;--shadow:0 8px 28px rgba(37,99,235,.14);--tint:rgba(37,99,235,.12);--tinttxt:#1d4ed8;--ph:rgba(37,99,235,.08);--ok:#0b7a6b;--red:#b3291c;--warn:#9a6a00;--page:linear-gradient(160deg,#e4eeff,#f7faff 45%,#d6e6ff);--b1:#9cc2ff;--b2:#c4d9ff;--b3:#a5c6ff;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:light}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--ink:#e8f0ff;--bg:rgba(20,34,62,.5);--sheet:rgba(16,28,52,.88);--soft:rgba(255,255,255,.08);--glass:rgba(255,255,255,.09);--edge:rgba(255,255,255,.14);--line:rgba(147,185,255,.2);--mute:#9bb2d4;--hero:linear-gradient(135deg,rgba(47,107,255,.38),rgba(20,34,62,.6));--dark:#3b82f6;--shadow:0 8px 28px rgba(0,0,0,.35);--tint:rgba(96,165,250,.18);--tinttxt:#9cc2ff;--ph:rgba(255,255,255,.06);--ok:#37c2ad;--red:#ff8a7a;--warn:#ffc83d;--page:linear-gradient(160deg,#0a1426,#0f2144 50%,#0a1830);--b1:#1d4ed8;--b2:#1e3a8a;--b3:#2563eb;color-scheme:dark}}
+:root[data-theme="dark"]{--ink:#e8f0ff;--bg:rgba(20,34,62,.5);--sheet:rgba(16,28,52,.88);--soft:rgba(255,255,255,.08);--glass:rgba(255,255,255,.09);--edge:rgba(255,255,255,.14);--line:rgba(147,185,255,.2);--mute:#9bb2d4;--hero:linear-gradient(135deg,rgba(47,107,255,.38),rgba(20,34,62,.6));--dark:#3b82f6;--shadow:0 8px 28px rgba(0,0,0,.35);--tint:rgba(96,165,250,.18);--tinttxt:#9cc2ff;--ph:rgba(255,255,255,.06);--ok:#37c2ad;--red:#ff8a7a;--warn:#ffc83d;--page:linear-gradient(160deg,#0a1426,#0f2144 50%,#0a1830);--b1:#1d4ed8;--b2:#1e3a8a;--b3:#2563eb;color-scheme:dark}
+*,*::before,*::after{box-sizing:inherit}
+html{height:100%;-webkit-text-size-adjust:100%}
+body{margin:0;min-height:100%;background:var(--page) fixed;color:var(--ink);font:15px/1.5 "Plus Jakarta Sans",system-ui,sans-serif;text-align:left;-webkit-font-smoothing:antialiased;font-variant-numeric:tabular-nums}
+body::before{content:"";position:fixed;inset:0;z-index:-1;background:radial-gradient(circle at 12% 8%,var(--b1),transparent 42%),radial-gradient(circle at 92% 34%,var(--b2),transparent 46%),radial-gradient(circle at 28% 96%,var(--b3),transparent 46%)}
+h1,h2,h3,h4,p{margin:0}
+h1,h2,h3,h4{letter-spacing:-.02em;text-wrap:balance}
+p{text-wrap:pretty}
+button,input,select{font:inherit;color:inherit}
+input,select{font-size:16px}
+button{cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation;transition:transform .12s,box-shadow .2s}
+button:active{transform:scale(.96)}
+a{color:inherit}
+:focus-visible{outline:3px solid var(--dark);outline-offset:2px}
+svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;display:block}
+
+/* komponen bersama */
+.note{font-size:.88rem;color:var(--mute)}
+.small{font-size:.85rem;margin-top:6px}
+.late{color:var(--red)}
+.card{background:var(--soft);border-radius:18px;padding:16px}
+.card h3{font-size:1rem;font-weight:700;margin:8px 0 2px}
+.t{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.code{font:500 .78rem ui-monospace,Menlo,monospace;background:var(--tint);color:var(--tinttxt);padding:2px 8px;border-radius:6px}
+.st{font-size:.76rem;font-weight:500;padding:2px 10px;border-radius:999px;border:1.5px solid currentColor}
+.st.wait{color:var(--warn)}.st.ok{color:var(--ok)}.st.done{color:var(--mute)}.st.no{color:var(--red)}
+.btn{border:0;border-radius:16px;min-height:50px;display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:0 18px;font-weight:600;font-size:.92rem;background:var(--soft)}
+.btn.pri{background:linear-gradient(135deg,#3b82f6,#2563eb);color:#fff}
+.btn.bad{color:var(--red)}
+.row{display:flex;gap:8px;margin-top:14px}
+.row .btn{flex:1}
+label{display:block;font-size:.85rem;font-weight:600;margin-top:12px}
+label input,label select,#kode{width:100%;margin-top:4px;padding:12px 14px;border:0;border-radius:14px;background:var(--soft);font-weight:400}
+.empty{padding:28px;text-align:center;color:var(--mute);border:1.5px dashed var(--line);border-radius:18px;grid-column:1/-1}
+.card,.btn,label input,label select,#kode{backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid var(--edge)}
+.card{box-shadow:var(--shadow)}
+.btn.pri{border-color:transparent;box-shadow:0 6px 16px rgba(37,99,235,.35)}
+
+/* dialog (bottom sheet) */
+dialog{border:0;border-radius:26px 26px 0 0;padding:0;width:min(460px,100%);max-width:100%;margin:auto auto 0;background:var(--sheet);backdrop-filter:blur(26px);-webkit-backdrop-filter:blur(26px);border-top:1px solid var(--edge);color:var(--ink)}
+dialog::backdrop{background:rgba(10,12,15,.55)}
+.sheet{max-height:88vh;overflow:auto;padding:18px 20px calc(22px + env(safe-area-inset-bottom,0px))}
+.sheet::before{content:"";display:block;width:42px;height:5px;border-radius:3px;background:var(--line);margin:-6px auto 14px}
+.sheet h2{font-size:1.35rem;font-weight:700}
+
+/* toast */
+#toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translate(-50%,20px);background:var(--dark);color:var(--on-dark);padding:10px 18px;border-radius:999px;opacity:0;pointer-events:none;transition:.25s;z-index:99;font-size:.9rem;white-space:nowrap}
+#toast.on{opacity:1;transform:translate(-50%,0)}
+
+.demo{background:var(--tint);color:var(--tinttxt);text-align:center;font-size:.8rem;font-weight:600;padding:6px 12px}
+@keyframes sheetUp{from{transform:translateY(100%)}to{transform:none}}
+@keyframes fade{from{opacity:0}}
+dialog[open]{animation:sheetUp .32s cubic-bezier(.2,.8,.2,1)}
+dialog[open]::backdrop{animation:fade .3s}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+
+
+/* admin.css: gaya khusus halaman admin */
+.wrap{max-width:900px;margin:0 auto;padding:18px 18px 40px}
+.top{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:14px}
+.top h1{font-size:1.4rem;font-weight:800;letter-spacing:-.03em}
+.top a{color:var(--tinttxt);font-weight:600;font-size:.9rem}
+.tabs,.chips{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none}
+.tabs{margin-bottom:16px}.chips{margin-bottom:14px}
+.tabs button,.chips button{flex:none;border:1px solid var(--edge);background:var(--soft);border-radius:14px;padding:10px 18px;font-weight:600;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+.chips button{padding:8px 14px;font-size:.85rem}
+.tabs button[aria-pressed="true"],.chips button[aria-pressed="true"]{background:linear-gradient(135deg,#3b82f6,#2563eb);color:#fff;border-color:transparent}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px}
+.grid .card{margin:0}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-bottom:16px}
+.stats div{background:var(--soft);border:1px solid var(--edge);border-radius:16px;padding:12px 14px}
+.stats b{display:block;font-size:1.5rem}
+.row.flush{margin:0 0 14px}
+.row .btn{min-height:44px}
+.aq{flex:2;min-width:0;padding:11px 14px;border:1px solid var(--edge);border-radius:14px;background:var(--soft)}
+.qrs{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:12px}
+.lbl{background:#fff;color:#0e2747;border:1px dashed #9cb4d8;border-radius:12px;padding:12px;text-align:center;break-inside:avoid}
+.lbl .q{display:grid;place-items:center;margin-bottom:6px}
+.lbl b{display:block;font-size:.85rem;line-height:1.3}
+.lbl span{font:500 .75rem ui-monospace,monospace}
+.gate{max-width:340px;margin:18vh auto 0}
+@media print{body{background:#fff}body::before{display:none}.wrap>*:not(#view){display:none!important}#view>*:not(.qrs){display:none!important}.qrs{grid-template-columns:repeat(3,1fr)}.lbl{border:1px solid #000}}
+
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top"><h1>BisaPINJAM Admin</h1><a href="index.html">← Ke halaman peminjam</a></div>
+  <div class="tabs" id="tabs"></div>
+  <div id="view"></div>
+</div>
+<dialog id="dlg"><div class="sheet" id="dlgBody"></div></dialog>
+<div id="toast" role="status" aria-live="polite"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script>
+/* Helper + lapisan data Firebase. Bagian ini sama di index.html dan admin.html. */
+/* Data: Firebase (Firestore + Auth). Isi firebaseConfig dari Firebase Console
+   (Project settings > Your apps > Web app). Isi sama persis di index.html dan admin.html. */
+const firebaseConfig = {
+  apiKey: 'ISI_DI_SINI',
+  authDomain: 'ISI_DI_SINI',
+  projectId: 'ISI_DI_SINI',
+  appId: 'ISI_DI_SINI'
+};
+const CFG_OK = !Object.values(firebaseConfig).some(v => v === 'ISI_DI_SINI');
+const FB_READY = CFG_OK && typeof firebase !== 'undefined';
+const DEMO = !CFG_OK; /* config belum diisi: mode demo, data tersimpan di browser ini */
+const FB_MSG = 'Firebase gagal dimuat. Periksa koneksi internet lalu muat ulang halaman.';
+let db = null, auth = null;
+if (FB_READY) { firebase.initializeApp(firebaseConfig); db = firebase.firestore(); auth = firebase.auth(); }
+else if (DEMO) {
+  ({db, auth} = demoFirebase());
+  document.body.insertAdjacentHTML('afterbegin', '<div class="demo">Mode demo: data tersimpan di browser ini. Isi firebaseConfig untuk menyambung ke Firebase.</div>');
+}
+let D = {items: [], loans: []};
+const dbErr = e => toast(e && e.code === 'permission-denied' ? 'Akses ditolak. Cek aturan Firestore' : 'Gagal: ' + ((e && e.message) || 'coba lagi'));
+const watch = (name, cb, where, fail) => { let r = db.collection(name); if (where) r = r.where(...where); return r.onSnapshot(s => cb(s.docs.map(d => d.data())), e => { dbErr(e); if (fail) fail(e); }); };
+const byTs = a => a.sort((x, y) => (x.ts || 0) - (y.ts || 0));
+const byId = a => a.sort((x, y) => x.id.localeCompare(y.id));
+function demoFirebase() {
+  const K = 'bisapinjam-demo-fb';
+  let S = null;
+  try { S = JSON.parse(localStorage.getItem(K)); } catch (e) {}
+  if (!S) S = {items: {}, loans: {}};
+  const persist = () => { try { localStorage.setItem(K, JSON.stringify(S)); } catch (e) {} };
+  const subs = new Set(), notify = () => subs.forEach(f => f());
+  addEventListener('storage', e => { if (e.key === K && e.newValue) { try { S = JSON.parse(e.newValue); notify(); } catch (x) {} } });
+  const clone = o => JSON.parse(JSON.stringify(o));
+  const ref = (col, id) => ({
+    get: async () => { const d = col === 'admins' ? (id === 'demo-admin' ? {ok: true} : undefined) : S[col][id]; return {exists: d !== undefined, data: () => d && clone(d)}; },
+    set: async d => { S[col][id] = clone(d); persist(); notify(); },
+    update: async p => { if (!S[col][id]) throw {code: 'not-found', message: 'Data tidak ditemukan'}; Object.assign(S[col][id], clone(p)); persist(); notify(); },
+    delete: async () => { delete S[col][id]; persist(); notify(); }
+  });
+  const query = (col, w) => ({
+    where: (f, op, v) => query(col, [f, op, v]),
+    onSnapshot: cb => {
+      const f = () => cb({docs: Object.values(S[col] || {}).filter(d => !w || d[w[0]] === w[2]).map(d => ({data: () => clone(d)}))});
+      subs.add(f); setTimeout(f, 0); return () => subs.delete(f);
+    }
+  });
+  const db = {
+    collection: col => ({...query(col), doc: id => ref(col, id)}),
+    runTransaction: async fn => {
+      const pend = [];
+      await fn({get: r => r.get(), update: (r, p) => { pend.push(() => r.update(p)); }});
+      for (const f of pend) await f();
+    },
+    batch: () => { const ops = []; return {set: (r, d) => { ops.push(() => r.set(d)); }, commit: async () => { for (const f of ops) await f(); }}; }
+  };
+  const isAdm = () => { try { return sessionStorage.getItem('pp-demo-admin') === '1'; } catch (e) { return false; } };
+  const user = () => isAdm() ? {uid: 'demo-admin', isAnonymous: false} : {uid: 'demo-user', isAnonymous: true};
+  const aSubs = new Set(), fire = () => aSubs.forEach(f => f(user()));
+  const auth = {
+    get currentUser() { return user(); },
+    onAuthStateChanged: cb => { aSubs.add(cb); setTimeout(() => cb(user()), 0); return () => aSubs.delete(cb); },
+    signInAnonymously: async () => {},
+    signInWithEmailAndPassword: async (e, p) => {
+      if (e.toLowerCase() !== 'admin@demo.test' || p !== 'admin123') throw {code: 'auth/invalid-credential'};
+      try { sessionStorage.setItem('pp-demo-admin', '1'); } catch (x) {} fire();
+    },
+    signOut: async () => { try { sessionStorage.removeItem('pp-demo-admin'); } catch (x) {} fire(); }
+  };
+  return {db, auth};
+}
+
+
+const q = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const ymd = d => new Date(d - d.getTimezoneOffset() * 6e4).toISOString().slice(0, 10); /* tanggal lokal, bukan UTC */
+const today = () => ymd(new Date());
+const addDays = n => ymd(new Date(Date.now() + n * 864e5));
+const fmt = d => d ? new Date(d + 'T00:00').toLocaleDateString('id-ID', {day:'numeric', month:'short'}) : '-';
+const item = id => D.items.find(i => i.id === id);
+const toast = m => { const t = q('#toast'); t.textContent = m; t.classList.add('on'); clearTimeout(toast.t); toast.t = setTimeout(() => t.classList.remove('on'), 2400); };
+const closeDlg = () => q('#dlg').close();
+q('#dlg').addEventListener('click', e => { if (e.target.id === 'dlg') closeDlg(); });
+
+const STAT = {diajukan:['Menunggu persetujuan','wait'], disetujui:['Disetujui, siap diambil','ok'], dipinjam:['Sedang dipinjam','ok'], selesai:['Selesai','done'], ditolak:['Ditolak','no'], dibatalkan:['Dibatalkan','no']};
+const loanInfo = l => {
+  const i = item(l.item) || {name: l.item}, [s, c] = STAT[l.status], late = l.status === 'dipinjam' && l.due < today();
+  return `<div class="t"><span class="code">${esc(l.id)}</span><span class="st ${c}">${s}</span></div>
+<h3>${esc(i.name)} × ${l.qty}</h3><p class="note">${esc(l.who)}${l.kelas ? ' (' + esc(l.kelas) + ')' : ''}, untuk ${esc(l.purpose)}</p>
+<p class="small">Pinjam ${fmt(l.date)}, kembali ${fmt(l.due)}${l.ret ? `, dikembalikan ${fmt(l.ret.date)} (${esc(l.ret.cond.toLowerCase())})` : ''}${late ? ' <b class="late">Terlambat</b>' : ''}</p>${l.note ? `<p class="small note">Catatan admin: ${esc(l.note)}</p>` : ''}`;
+};
+
+</script>
+<script>
+/* admin.js: login Firebase Auth (email/kata sandi), data real-time dari Firestore.
+   Akun admin = akun Auth yang UID-nya ada di koleksi "admins" (lihat aturan Firestore). */
+let tab = 'req', filt = 'diajukan', admin = false, ready = false, unsub = [];
+const FILT = [['diajukan', 'Menunggu'], ['disetujui', 'Siap diambil'], ['dipinjam', 'Dipinjam'], ['telat', 'Terlambat'], ['selesai', 'Selesai'], ['ditolak', 'Ditolak'], ['dibatalkan', 'Dibatalkan']];
+
+let aterm = '';
+const hit = (l, s) => s === 'telat' ? l.status === 'dipinjam' && l.due < today() : l.status === s;
+const listHtml = () => {
+  const t = aterm.toLowerCase();
+  const list = D.loans.filter(l => hit(l, filt) && (!t || [l.id, l.who, l.kelas || '', l.purpose, (item(l.item) || {}).name].join(' ').toLowerCase().includes(t))).reverse();
+  return list.length ? list.map(loanCard).join('') : '<p class="empty">Tidak ada data di status ini.</p>';
+};
+const csv = () => {
+  const c = v => { let s = String(v ?? ''); if (/^[=+\-@]/.test(s)) s = "'" + s; return '"' + s.replace(/"/g, '""') + '"'; };
+  const rows = [['Kode', 'Barang', 'Jumlah', 'Peminjam', 'Kelas', 'Tujuan', 'Tgl pinjam', 'Rencana kembali', 'Status', 'Tgl kembali', 'Kondisi kembali', 'Catatan']]
+    .concat(D.loans.map(l => [l.id, (item(l.item) || {}).name || l.item, l.qty, l.who, l.kelas || '', l.purpose, l.date, l.due, STAT[l.status][0], l.ret ? l.ret.date : '', l.ret ? l.ret.cond : '', l.note || '']));
+  const el = document.createElement('a');
+  el.href = URL.createObjectURL(new Blob(['\ufeff' + rows.map(r => r.map(c).join(',')).join('\n')], {type: 'text/csv;charset=utf-8'}));
+  el.download = 'pinjaman-' + today() + '.csv'; el.click(); setTimeout(() => URL.revokeObjectURL(el.href), 1000);
+};
+const loanCard = l => {
+  const acts = {
+    diajukan: '<button class="btn bad" data-act="tolak">Tolak</button><button class="btn pri" data-act="setuju">Setujui</button>',
+    disetujui: '<button class="btn bad" data-act="tolak">Batalkan</button><button class="btn pri" data-act="serah">Serahkan barang</button>',
+    dipinjam: '<button class="btn" data-act="extend">Perpanjang 3 hari</button><button class="btn pri" data-act="kembali">Terima pengembalian</button>'
+  }[l.status] || '';
+  return `<article class="card" data-loan="${esc(l.id)}">${loanInfo(l)}${['diajukan', 'disetujui'].includes(l.status) ? (st => `<p class="small ${st < l.qty ? 'late' : 'note'}">Stok sekarang: ${st}${st < l.qty ? ', kurang dari jumlah diminta' : ''}</p>`)((item(l.item) || {}).stock ?? 0) : ''}${acts ? `<div class="row">${acts}</div>` : ''}</article>`;
+};
+
+const views = {
+  req: () => {
+    const n = s => D.loans.filter(l => hit(l, s)).length;
+    return `<div class="stats"><div><b>${n('diajukan')}</b><span class="note">Menunggu</span></div><div><b>${n('dipinjam')}</b><span class="note">Dipinjam</span></div><div><b>${n('telat')}</b><span class="note">Terlambat</span></div><div><b>${D.items.reduce((a, i) => a + i.stock, 0)}</b><span class="note">Stok tersedia</span></div></div>
+<div class="row flush"><input id="aq" class="aq" type="search" placeholder="Cari nama, barang, atau kode" aria-label="Cari pinjaman" value="${esc(aterm)}"><button class="btn" data-act="csv">Ekspor CSV</button></div>
+<div class="chips">${FILT.map(([k, l]) => `<button data-filt="${k}" aria-pressed="${filt === k}">${l} (${n(k)})</button>`).join('')}</div>
+<div class="grid" id="alist">${listHtml()}</div>`;
+  },
+  stok: () => `<div class="row flush"><button class="btn pri" data-act="baru">+ Tambah barang</button></div>
+<div class="grid">${D.items.length ? D.items.map(i => `<article class="card"><div class="t"><span class="code">${esc(i.id)}</span><span class="note">${esc(i.cat)}</span></div>
+<h3>${esc(i.name)}</h3><p class="note">${esc(i.loc)}, kondisi ${i.cond === 'Baik' ? 'baik' : '<b class="late">' + esc(i.cond.toLowerCase()) + '</b>'}</p><p class="small"><b>${i.stock}</b> tersedia dari ${i.total}${i.stock === 0 ? ' <b class="late">Habis</b>' : ''}</p>
+<div class="row"><button class="btn" data-edit="${esc(i.id)}">Ubah</button><button class="btn bad" data-del="${esc(i.id)}">Hapus</button></div></article>`).join('') : '<p class="empty">Belum ada barang. Tekan "+ Tambah barang" untuk mulai.</p>'}</div>`,
+  qr: () => `<div class="row flush"><button class="btn pri" onclick="print()">Cetak semua label</button></div>
+<div class="qrs">${D.items.map(i => `<div class="lbl"><div class="q" data-qr="PP:${esc(i.id)}"></div><b>${esc(i.name)}</b><span>${esc(i.id)}</span></div>`).join('') || '<p class="empty">Belum ada barang.</p>'}</div>`
+};
+
+function render() {
+  const tabs = q('#tabs'), view = q('#view');
+  tabs.innerHTML = '';
+  if (!db) { view.innerHTML = `<p class="empty">${FB_MSG}</p>`; return; }
+  if (!ready) { view.innerHTML = '<p class="empty">Memuat…</p>'; return; }
+  if (!admin) {
+    view.innerHTML = `<form class="card gate" id="gate"><h3>Masuk admin</h3><label>Email<input type="email" name="email" required autocomplete="username"></label><label>Kata sandi<input type="password" name="pw" required autocomplete="current-password"></label><div class="row"><button class="btn pri">Masuk</button></div>${DEMO ? '<p class="small note">Mode demo: email <b>admin@demo.test</b>, kata sandi <b>admin123</b></p>' : ''}</form>`;
+    return;
+  }
+  tabs.innerHTML = [['req', 'Permintaan'], ['stok', 'Barang'], ['qr', 'Label QR']].map(([k, l]) => `<button data-tab="${k}" aria-pressed="${tab === k}">${l}</button>`).join('') + (DEMO ? '<button data-reset>Reset demo</button>' : '') + '<button data-out>Keluar</button>';
+  view.innerHTML = views[tab]();
+  document.querySelectorAll('[data-qr]').forEach(el => new QRCode(el, {text: el.dataset.qr, width: 120, height: 120, correctLevel: QRCode.CorrectLevel.M}));
+}
+
+function itemForm(i) {
+  q('#dlgBody').innerHTML = `<h2>${i ? 'Ubah barang' : 'Barang baru'}</h2><form id="itf" data-id="${i ? esc(i.id) : ''}">
+<label>Nama<input name="name" required value="${esc(i?.name)}"></label><label>Kategori<input name="cat" list="catl" required value="${esc(i?.cat)}"><datalist id="catl">${[...new Set(D.items.map(x => x.cat))].map(c => `<option value="${esc(c)}">`).join('')}</datalist></label>
+<label>Lokasi<input name="loc" required value="${esc(i?.loc)}"></label><label>Jumlah total<input name="total" type="number" min="1" required value="${i ? i.total : 1}"></label>
+<label>Foto (nama file atau URL, opsional)<input name="img" value="${esc(i?.img)}" placeholder="stok1.jpg"></label>
+<label>Kondisi<select name="cond">${['Baik', 'Rusak ringan', 'Rusak'].map(c => `<option ${i?.cond === c ? 'selected' : ''}>${c}</option>`).join('')}</select></label>
+<div class="row"><button type="button" class="btn" data-close>Batal</button><button class="btn pri">Simpan</button></div></form>`;
+  q('#dlg').showModal();
+}
+
+const setLoan = (id, patch, msg) => db.collection('loans').doc(id).update(patch).then(() => toast(msg)).catch(dbErr);
+const handover = id => db.runTransaction(async t => {
+  const lr = db.collection('loans').doc(id), ls = await t.get(lr), L = ls.data();
+  const ir = db.collection('items').doc(L.item), isn = await t.get(ir), I = isn.data();
+  if (L.status !== 'disetujui') throw new Error('Status pinjaman sudah berubah');
+  if (!I || I.stock < L.qty) throw new Error('Stok tidak cukup untuk diserahkan');
+  t.update(ir, {stock: I.stock - L.qty}); t.update(lr, {status: 'dipinjam', date: today()});
+}).then(() => toast('Barang diserahkan')).catch(dbErr);
+const giveBack = (id, cond) => db.runTransaction(async t => {
+  const lr = db.collection('loans').doc(id), ls = await t.get(lr), L = ls.data();
+  const ir = db.collection('items').doc(L.item), isn = await t.get(ir);
+  if (L.status !== 'dipinjam') throw new Error('Status pinjaman sudah berubah');
+  t.update(lr, {status: 'selesai', ret: {date: today(), cond}});
+  if (isn.exists) { const I = isn.data(), up = {stock: Math.min(I.total, I.stock + L.qty)}; if (cond !== 'Baik') up.cond = cond; t.update(ir, up); }
+}).then(() => { closeDlg(); toast('Pengembalian dicatat'); }).catch(dbErr);
+
+document.addEventListener('click', e => {
+  const t = e.target.closest('button'); if (!t) return;
+  const d = t.dataset;
+  if (d.tab) { tab = d.tab; render(); }
+  else if ('out' in d) auth.signOut();
+  else if ('reset' in d) { if (confirm('Hapus semua data demo?')) { try { localStorage.removeItem('bisapinjam-demo-fb'); } catch (e) {} location.reload(); } }
+  else if (d.filt) { filt = d.filt; render(); }
+  else if ('close' in d) closeDlg();
+  else if (d.edit) itemForm(item(d.edit));
+  else if (d.del) {
+    if (D.loans.some(l => l.item === d.del && ['diajukan', 'disetujui', 'dipinjam'].includes(l.status))) return toast('Masih ada pinjaman aktif untuk barang ini');
+    if (confirm('Hapus barang ' + d.del + '?')) db.collection('items').doc(d.del).delete().catch(dbErr);
+  }
+  else if (d.act === 'baru') itemForm();
+  else if (d.act === 'csv') csv();
+  else if (d.act) {
+    const id = t.closest('[data-loan]').dataset.loan;
+    if (d.act === 'setuju') setLoan(id, {status: 'disetujui'}, 'Pinjaman disetujui');
+    else if (d.act === 'tolak') {
+      q('#dlgBody').innerHTML = `<h2>Tolak pinjaman</h2><form id="nf" data-id="${esc(id)}"><label>Alasan (opsional, tampil ke peminjam)<input name="note" maxlength="140"></label>
+<div class="row"><button type="button" class="btn" data-close>Batal</button><button class="btn pri">Tolak</button></div></form>`;
+      q('#dlg').showModal();
+    }
+    else if (d.act === 'serah') handover(id);
+    else if (d.act === 'extend') { const l = D.loans.find(x => x.id === id), t2 = new Date(l.due + 'T00:00:00Z'); t2.setUTCDate(t2.getUTCDate() + 3); setLoan(id, {due: t2.toISOString().slice(0, 10)}, 'Diperpanjang 3 hari'); }
+    else if (d.act === 'kembali') {
+      q('#dlgBody').innerHTML = `<h2>Terima pengembalian</h2><form id="rf" data-id="${esc(id)}"><label>Kondisi barang<select name="cond"><option>Baik</option><option>Rusak ringan</option><option>Rusak</option></select></label>
+<div class="row"><button type="button" class="btn" data-close>Batal</button><button class="btn pri">Selesai</button></div></form>`;
+      q('#dlg').showModal();
+    }
+  }
+});
+
+document.addEventListener('input', e => { if (e.target.id === 'aq') { aterm = e.target.value; q('#alist').innerHTML = listHtml(); } });
+
+document.addEventListener('submit', e => {
+  e.preventDefault();
+  const f = e.target, v = Object.fromEntries(new FormData(f));
+  if (f.id === 'gate') auth.signInWithEmailAndPassword(v.email.trim(), v.pw).catch(() => toast('Gagal masuk: email atau kata sandi salah'));
+  else if (f.id === 'rf') giveBack(f.dataset.id, v.cond);
+  else if (f.id === 'nf') { closeDlg(); setLoan(f.dataset.id, {status: 'ditolak', note: v.note.trim()}, 'Pinjaman ditolak'); }
+  else if (f.id === 'itf') {
+    const total = +v.total, base = {name: v.name.trim(), cat: v.cat.trim(), loc: v.loc.trim(), cond: v.cond, img: v.img.trim(), total};
+    let p;
+    if (f.dataset.id) {
+      const i = item(f.dataset.id), out = i.total - i.stock;
+      if (total < out) return toast('Total tidak boleh kurang dari barang yang sedang dipinjam (' + out + ')');
+      p = db.collection('items').doc(i.id).update({...base, stock: total - out});
+    } else {
+      const n = Math.max(0, ...D.items.map(i => +i.id.replace(/\D/g, '') || 0)) + 1, id = 'BRG-' + String(n).padStart(3, '0');
+      p = db.collection('items').doc(id).set({id, ...base, stock: total});
+    }
+    p.then(() => { closeDlg(); toast('Barang disimpan'); }).catch(dbErr);
+  }
+});
+
+if (db) auth.onAuthStateChanged(async u => {
+  unsub.forEach(f => f()); unsub = []; admin = false; D = {items: [], loans: []};
+  if (u && !u.isAnonymous) {
+    try { admin = (await db.collection('admins').doc(u.uid).get()).exists; } catch (e) {}
+    if (!admin) { toast('Akun ini bukan admin'); return auth.signOut(); }
+    unsub = [watch('items', a => { D.items = byId(a); render(); }), watch('loans', a => { D.loans = byTs(a); render(); })];
+  }
+  ready = true; render();
+});
+render();
+
+</script>
+</body>
+</html>
