@@ -133,6 +133,10 @@ body::before{background:radial-gradient(circle at 10% 8%,rgba(96,165,250,.45),tr
 .chips button[aria-pressed="true"],.tabs button[aria-pressed="true"]{background:var(--grad);color:#fff}
 .stats>div:nth-child(1) b{color:#d98a06}.stats>div:nth-child(2) b{color:#2f7cf6}.stats>div:nth-child(3) b{color:#e5484d}.stats>div:nth-child(4) b{color:#0f9f7a}
 .qrbox{display:grid;place-items:center;background:#fff;border-radius:18px;padding:14px;width:fit-content;min-width:200px;min-height:200px;margin:14px auto;color:#0f2a4a;text-align:center}
+.fup{display:grid;gap:8px;margin:10px 0}
+.fprev{height:170px;border-radius:14px;border:1px dashed var(--line);display:grid;place-items:center;overflow:hidden;color:var(--mute);font-size:.85rem;background:var(--ph)}
+.fprev img{width:100%;height:100%;object-fit:cover}
+.fup .row{margin:0}
 </style>
 </head>
 <body>
@@ -320,11 +324,33 @@ function itemForm(i) {
   q('#dlgBody').innerHTML = `<h2>${i ? 'Ubah barang' : 'Barang baru'}</h2><form id="itf" data-id="${i ? esc(i.id) : ''}">
 <label>Nama<input name="name" required value="${esc(i?.name)}"></label><label>Kategori<input name="cat" list="catl" required value="${esc(i?.cat)}"><datalist id="catl">${[...new Set(D.items.map(x => x.cat))].map(c => `<option value="${esc(c)}">`).join('')}</datalist></label>
 <label>Lokasi<input name="loc" required value="${esc(i?.loc)}"></label><label>Jumlah total<input name="total" type="number" min="1" required value="${i ? i.total : 1}"></label>
-<label>Foto (nama file atau URL, opsional)<input name="img" value="${esc(i?.img)}" placeholder="stok1.jpg"></label>
+<div class="fup"><div class="small note">Foto barang (opsional)</div><div class="fprev" id="fprev"></div><div class="row"><button type="button" class="btn pri" data-pick>Pilih foto dari galeri</button><button type="button" class="btn bad" data-delimg>Hapus foto</button></div><input type="file" id="ffile" accept="image/*" hidden><input type="hidden" name="img" id="imgv"></div>
 <label>Kondisi<select name="cond">${['Baik', 'Rusak ringan', 'Rusak'].map(c => `<option ${i?.cond === c ? 'selected' : ''}>${c}</option>`).join('')}</select></label>
 <div class="row"><button type="button" class="btn" data-close>Batal</button><button class="btn pri">Simpan</button></div></form>`;
-  q('#dlg').showModal();
+  q('#dlg').showModal(); q('#imgv').value = i?.img || ''; setPrev(i?.img);
 }
+const setPrev = src => { q('#fprev').innerHTML = src ? `<img src="${esc(src)}" alt="" onerror="this.parentNode.textContent='Foto tidak ditemukan'">` : 'Belum ada foto'; };
+/* foto dari galeri: diperkecil (maks. 640 px) lalu disimpan langsung di data barang, tanpa Firebase Storage */
+function compress(file, max = 640) {
+  return new Promise((ok, no) => {
+    const url = URL.createObjectURL(file), im = new Image();
+    im.onload = () => {
+      const k = Math.min(1, max / Math.max(im.naturalWidth, im.naturalHeight)), w = Math.round(im.naturalWidth * k), h = Math.round(im.naturalHeight * k);
+      const c = document.createElement('canvas'); c.width = w; c.height = h;
+      const x = c.getContext('2d'); x.fillStyle = '#fff'; x.fillRect(0, 0, w, h); x.drawImage(im, 0, 0, w, h);
+      let out = c.toDataURL('image/jpeg', .72); if (out.length > 160000) out = c.toDataURL('image/jpeg', .5);
+      URL.revokeObjectURL(url); ok(out);
+    };
+    im.onerror = () => { URL.revokeObjectURL(url); no(new Error('Foto tidak bisa dibaca')); };
+    im.src = url;
+  });
+}
+document.addEventListener('change', async e => {
+  if (e.target.id !== 'ffile' || !e.target.files[0]) return;
+  try { const out = await compress(e.target.files[0]); q('#imgv').value = out; setPrev(out); toast('Foto siap, jangan lupa tekan Simpan'); }
+  catch (x) { toast(x.message || 'Foto gagal diproses'); }
+  e.target.value = '';
+});
 
 const setLoan = (id, patch, msg) => db.collection('loans').doc(id).update(patch).then(() => toast(msg)).catch(dbErr);
 const handover = id => db.runTransaction(async t => {
@@ -347,6 +373,8 @@ document.addEventListener('click', e => {
   const d = t.dataset;
   if (d.tab) { tab = d.tab; render(); }
   else if ('out' in d) auth.signOut();
+  else if ('pick' in d) q('#ffile').click();
+  else if ('delimg' in d) { q('#imgv').value = ''; setPrev(''); }
   else if ('reset' in d) { if (confirm('Hapus semua data demo?')) { try { localStorage.removeItem('bisapinjam-demo-fb'); } catch (e) {} location.reload(); } }
   else if (d.filt) { filt = d.filt; render(); }
   else if ('close' in d) closeDlg();
