@@ -1,0 +1,66 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() { return request.auth != null; }
+    function isAdmin() {
+      return signedIn() && exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+    }
+
+    // Daftar admin: hanya boleh dibaca oleh akunnya sendiri, diubah lewat Console Firebase
+    match /admins/{uid} {
+      allow read: if signedIn() && request.auth.uid == uid;
+      allow write: if false;
+    }
+
+    // Barang: semua orang boleh melihat, hanya admin yang mengubah
+    match /items/{id} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Pinjaman: peminjam hanya melihat miliknya, admin melihat semua
+    match /loans/{id} {
+      allow read: if isAdmin() || (signedIn() && resource.data.uid == request.auth.uid);
+      allow create: if signedIn()
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.status == 'diajukan';
+      allow update: if isAdmin()
+        || (signedIn() && resource.data.uid == request.auth.uid
+            && resource.data.status == 'diajukan'
+            && request.resource.data.status == 'dibatalkan');
+      allow delete: if isAdmin();
+    }
+
+    // Like: satu per orang per barang
+    match /likes/{id} {
+      allow read: if true;
+      allow create: if signedIn()
+        && request.resource.data.uid == request.auth.uid
+        && id == request.resource.data.item + '_' + request.auth.uid;
+      allow delete: if signedIn() && resource.data.uid == request.auth.uid;
+    }
+
+    // Ulasan: rating 1-5 + komentar, admin boleh membalas dan menghapus
+    match /reviews/{id} {
+      allow read: if true;
+      allow create: if signedIn()
+        && request.resource.data.uid == request.auth.uid
+        && id == request.resource.data.item + '_' + request.auth.uid
+        && request.resource.data.rating is int
+        && request.resource.data.rating >= 1 && request.resource.data.rating <= 5
+        && request.resource.data.text.size() <= 300;
+      allow update: if signedIn()
+        && ((resource.data.uid == request.auth.uid
+             && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['reply', 'replyTs']))
+            || isAdmin());
+      allow delete: if signedIn() && (resource.data.uid == request.auth.uid || isAdmin());
+    }
+
+    // Pengaturan aplikasi (ikon): semua boleh membaca, hanya admin yang mengubah
+    match /settings/{id} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+  }
+}
