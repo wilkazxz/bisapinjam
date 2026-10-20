@@ -264,6 +264,39 @@ dialog[open]::backdrop{animation:fade .3s}
 .pc:nth-child(4n+4) .pcb .ph{background:#c8defb}
 .stats b{color:#1f63c9}.stats>div:nth-child(2) b{color:#d19a00}.stats>div:nth-child(3) b{color:#e5484d}.stats>div:nth-child(4) b{color:#0b2d6e}
 @media(prefers-color-scheme:dark){.stats b{color:#6aaaff}.stats>div:nth-child(2) b{color:#ffd21f}.stats>div:nth-child(3) b{color:#ff8a8a}.stats>div:nth-child(4) b{color:#e8f0ff}}
+
+/* ===== struk bukti, peta, mode cetak ===== */
+.btn{text-decoration:none}
+.map{display:block;width:100%;height:300px;border:0;border-radius:16px;margin-top:12px;background:var(--ph)}
+.struk{background:#fff;color:#0d2b5e;border-radius:16px;padding:22px 18px;border:1px solid #d5e3f7;font-size:.86rem;margin-top:4px}
+.struk hr{border:0;border-top:1.5px dashed #b9cdea;margin:12px 0}
+.sk-top{text-align:center}
+.sk-ck{width:64px;height:64px;border-radius:50%;margin:6px auto 12px;display:grid;place-items:center;background:#1f63c9;color:#fff;box-shadow:0 0 0 8px #e6f0fd}
+.sk-ck svg{width:34px;height:34px}
+.sk-top.wait .sk-ck{background:#ffd21f;color:#0b2d6e;box-shadow:0 0 0 8px #fff3c4}
+.sk-top h3{font-size:1.1rem;margin:6px 0 0;color:#0d2b5e}
+.sk-top p{color:#6b7f9c;font-size:.8rem;margin:2px 0 0}
+.sk-brand{text-align:center;margin-top:14px}
+.sk-brand span{display:block;font-weight:800;font-size:1rem;color:#1f63c9}
+.sk-brand small{color:#6b7f9c}
+.sk-code{text-align:center;font:700 1rem ui-monospace,Menlo,monospace;letter-spacing:.08em;background:#e6f0fd;color:#1f5fc4;border-radius:8px;padding:6px;margin-top:10px}
+.sr{display:flex;justify-content:space-between;gap:14px;padding:3px 0}
+.sr span{color:#6b7f9c;flex:none}
+.sr b{text-align:right;font-weight:600;word-break:break-word}
+.sk-qr{display:grid;place-items:center;margin:6px 0}
+.sk-note{text-align:center;color:#6b7f9c;font-size:.76rem}
+.sk-foot{text-align:center;color:#9aaccb;font-size:.7rem;margin-top:8px}
+@page{margin:8mm}
+@media print{
+body.printing{background:#fff}
+body.printing>*:not(#dlg){display:none!important}
+body.printing #dlg{position:static;display:block;width:auto;max-width:none;margin:0;background:none;border:0;animation:none;overflow:visible}
+body.printing .sheet{max-height:none;overflow:visible;padding:0;background:none}
+body.printing .sheet::before{display:none}
+body.printing .sheet>:not(.struk){display:none!important}
+body.printing #toast{display:none!important}
+body.printing .struk{max-width:380px;margin:0 auto;border:1px dashed #999;border-radius:0}
+}
 </style>
 </head>
 <body>
@@ -320,12 +353,60 @@ const closeDlg = () => q('#dlg').close();
 q('#dlg').addEventListener('click', e => { if (e.target.id === 'dlg') closeDlg(); });
 const qrUrl = id => location.origin + location.pathname.replace(/[^/]*$/, '') + 'index.html?i=' + encodeURIComponent(id); /* isi QR = tautan, bisa discan kamera HP biasa */
 
+/* ===== helper tambahan: kode acak, pustaka lazy, struk bukti (pratinjau, cetak, PDF), peta ===== */
+const byName = a => a.sort((x, y) => String(x.name).localeCompare(String(y.name)));
+const rid = () => { const A = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789', r = crypto.getRandomValues(new Uint8Array(6)); return 'BRG-' + Array.from(r, x => A[x % A.length]).join(''); };
+const loadScript = (url, ok) => ok() ? Promise.resolve() : new Promise((res, rej) => { const el = document.createElement('script'); el.src = url; el.onload = res; el.onerror = () => rej(new Error('Gagal memuat pustaka')); document.head.appendChild(el); });
+const strukOk = ['diajukan', 'disetujui', 'dipinjam', 'selesai'];
+const strukTitle = {diajukan: ['Pengajuan Terkirim', 'wait'], disetujui: ['Peminjaman Disetujui', 'ok'], dipinjam: ['Barang Sedang Dipinjam', 'ok'], selesai: ['Peminjaman Selesai', 'ok']};
+const fdt = d => d ? new Date(d + 'T00:00').toLocaleDateString('id-ID', {day: 'numeric', month: 'long', year: 'numeric'}) : '-';
+function strukHtml(l) {
+  const i = item(l.item) || {name: l.item}, [ttl, kind] = strukTitle[l.status] || ['Bukti Peminjaman', 'ok'];
+  const row = (k, v) => v ? `<div class="sr"><span>${k}</span><b>${esc(v)}</b></div>` : '';
+  const icon = kind === 'wait' ? '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>' : '<path d="M5 13l4 4L19 7"/>';
+  return `<div class="struk" id="struk"><div class="sk-top ${kind}"><div class="sk-ck"><svg viewBox="0 0 24 24" stroke-width="3">${icon}</svg></div><h3>${ttl}</h3><p>${esc(STAT[l.status][0])}</p></div>
+<div class="sk-brand"><span>BisaPINJAM</span><small>Bukti Peminjaman Barang</small></div>
+<div class="sk-code">${esc(l.id)}</div><hr>
+${row('Barang', i.name)}${row('Jumlah', l.qty + ' unit')}${row('Peminjam', l.who)}${row('Kelas', l.kelas)}${row('Tujuan', l.purpose)}${row('Alamat', l.addr)}<hr>
+${row('Tgl pinjam', fdt(l.date))}${row('Rencana kembali', fdt(l.due))}${l.ret ? row('Dikembalikan', fdt(l.ret.date)) + row('Kondisi', l.ret.cond) : ''}${row('Catatan', l.note)}<hr>
+<div class="sk-qr" id="skQr"></div><p class="sk-note">Tunjukkan struk ini saat mengambil dan mengembalikan barang.</p>
+<p class="sk-foot">Dicetak ${new Date().toLocaleString('id-ID', {dateStyle: 'medium', timeStyle: 'short'})}</p></div>`;
+}
+function showStruk(id) {
+  const l = D.loans.find(x => x.id === id); if (!l) return;
+  q('#dlgBody').innerHTML = strukHtml(l) + `<div class="row"><button class="btn" data-close>Tutup</button><button class="btn" data-pdf="${esc(l.id)}">Unduh PDF</button><button class="btn pri" data-print>Cetak</button></div>`;
+  q('#dlg').showModal(); if (document.activeElement) document.activeElement.blur();
+  loadScript('https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js', () => window.QRCode).then(() => { const b = q('#skQr'); if (b && !b.firstChild) new QRCode(b, {text: l.id, width: 110, height: 110, correctLevel: QRCode.CorrectLevel.M}); }).catch(() => {});
+}
+const printStruk = () => { document.body.classList.add('printing'); setTimeout(() => print(), 60); };
+addEventListener('afterprint', () => document.body.classList.remove('printing'));
+async function pdfStruk(id) {
+  const el = q('#struk'); if (!el) return;
+  toast('Menyiapkan PDF…');
+  try {
+    await loadScript('https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js', () => window.html2canvas);
+    await loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js', () => window.jspdf);
+    const c = await html2canvas(el, {scale: 2, backgroundColor: '#ffffff'});
+    const W = 90, H = W * c.height / c.width, pdf = new window.jspdf.jsPDF({unit: 'mm', format: [W, H]});
+    pdf.addImage(c.toDataURL('image/png'), 'PNG', 0, 0, W, H);
+    pdf.save('struk-' + id + '.pdf'); toast('PDF tersimpan');
+  } catch (e) { toast('PDF gagal dibuat. Pakai Cetak lalu pilih Simpan sebagai PDF'); }
+}
+function showMap(id) {
+  const l = D.loans.find(x => x.id === id); if (!l) return;
+  const has = l.lat != null && l.lng != null, qy = has ? l.lat + ',' + l.lng : (l.addr || '');
+  q('#dlgBody').innerHTML = `<h2>Lokasi peminjam</h2><p class="note">${esc(l.who)}${l.kelas ? ' (' + esc(l.kelas) + ')' : ''}</p><p class="small">${esc(l.addr || 'Alamat tidak diisi')}</p>
+<iframe class="map" title="Peta lokasi peminjam" loading="lazy" referrerpolicy="no-referrer-when-downgrade" src="https://maps.google.com/maps?q=${encodeURIComponent(qy)}&z=${has ? 16 : 15}&output=embed"></iframe>
+<div class="row"><button class="btn" data-close>Tutup</button><a class="btn pri" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(qy)}">Buka di Google Maps</a></div>`;
+  q('#dlg').showModal(); if (document.activeElement) document.activeElement.blur();
+}
+
 const STAT = {diajukan:['Menunggu persetujuan','wait'], disetujui:['Disetujui, siap diambil','ok'], dipinjam:['Sedang dipinjam','ok'], selesai:['Selesai','done'], ditolak:['Ditolak','no'], dibatalkan:['Dibatalkan','no']};
 const loanInfo = l => {
   const i = item(l.item) || {name: l.item}, [s, c] = STAT[l.status], late = l.status === 'dipinjam' && l.due < today();
   return `<div class="t"><span class="code">${esc(l.id)}</span><span class="st ${c}">${s}</span></div>
 <h3>${esc(i.name)} × ${l.qty}</h3><p class="note">${esc(l.who)}${l.kelas ? ' (' + esc(l.kelas) + ')' : ''}, untuk ${esc(l.purpose)}</p>
-<p class="small">Pinjam ${fmt(l.date)}, kembali ${fmt(l.due)}${l.ret ? `, dikembalikan ${fmt(l.ret.date)} (${esc(l.ret.cond.toLowerCase())})` : ''}${late ? ' <b class="late">Terlambat</b>' : ''}</p>${l.note ? `<p class="small note">Catatan admin: ${esc(l.note)}</p>` : ''}`;
+<p class="small">Pinjam ${fmt(l.date)}, kembali ${fmt(l.due)}${l.ret ? `, dikembalikan ${fmt(l.ret.date)} (${esc(l.ret.cond.toLowerCase())})` : ''}${late ? ' <b class="late">Terlambat</b>' : ''}</p>${l.addr ? `<p class="small note">Alamat: ${esc(l.addr)}</p>` : ''}${l.note ? `<p class="small note">Catatan admin: ${esc(l.note)}</p>` : ''}`;
 };
 
 </script>
@@ -352,13 +433,19 @@ const csv = () => {
   el.href = URL.createObjectURL(new Blob(['\ufeff' + rows.map(r => r.map(c).join(',')).join('\n')], {type: 'text/csv;charset=utf-8'}));
   el.download = 'pinjaman-' + today() + '.csv'; el.click(); setTimeout(() => URL.revokeObjectURL(el.href), 1000);
 };
+const tools = l => {
+  const b = [];
+  if (['disetujui', 'dipinjam'].includes(l.status) && (l.addr || l.lat != null)) b.push(`<button class="btn" data-map="${esc(l.id)}">Lihat peta</button>`);
+  if (strukOk.includes(l.status)) b.push(`<button class="btn" data-struk="${esc(l.id)}">Struk</button>`);
+  return b.length ? `<div class="row">${b.join('')}</div>` : '';
+};
 const loanCard = l => {
   const acts = {
     diajukan: '<button class="btn bad" data-act="tolak">Tolak</button><button class="btn pri" data-act="setuju">Setujui</button>',
     disetujui: '<button class="btn bad" data-act="tolak">Batalkan</button><button class="btn pri" data-act="serah">Serahkan barang</button>',
     dipinjam: '<button class="btn" data-act="extend">Perpanjang 3 hari</button><button class="btn pri" data-act="kembali">Terima pengembalian</button>'
   }[l.status] || '';
-  return `<article class="card" data-loan="${esc(l.id)}">${loanInfo(l)}${['diajukan', 'disetujui'].includes(l.status) ? (st => `<p class="small ${st < l.qty ? 'late' : 'note'}">Stok sekarang: ${st}${st < l.qty ? ', kurang dari jumlah diminta' : ''}</p>`)((item(l.item) || {}).stock || 0) : ''}${acts ? `<div class="row">${acts}</div>` : ''}</article>`;
+  return `<article class="card" data-loan="${esc(l.id)}">${loanInfo(l)}${['diajukan', 'disetujui'].includes(l.status) ? (st => `<p class="small ${st < l.qty ? 'late' : 'note'}">Stok sekarang: ${st}${st < l.qty ? ', kurang dari jumlah diminta' : ''}</p>`)((item(l.item) || {}).stock || 0) : ''}${acts ? `<div class="row">${acts}</div>` : ''}${tools(l)}</article>`;
 };
 
 const views = {
@@ -469,6 +556,10 @@ document.addEventListener('click', e => {
   else if (d.filt) { filt = d.filt; render(); }
   else if ('close' in d) closeDlg();
   else if (d.qrshow) showQr(d.qrshow);
+  else if (d.struk) showStruk(d.struk);
+  else if (d.map) showMap(d.map);
+  else if ('print' in d) printStruk();
+  else if (d.pdf) pdfStruk(d.pdf);
   else if (d.copy) navigator.clipboard.writeText(d.copy).then(() => toast('Tautan disalin')).catch(() => toast('Gagal menyalin'));
   else if (d.edit) itemForm(item(d.edit));
   else if (d.del) {
@@ -512,7 +603,7 @@ document.addEventListener('submit', e => {
       if (total < out) return toast('Total tidak boleh kurang dari barang yang sedang dipinjam (' + out + ')');
       p = db.collection('items').doc(i.id).update({...base, stock: total - out});
     } else {
-      const n = Math.max(0, ...D.items.map(i => +i.id.replace(/\D/g, '') || 0)) + 1, id = 'BRG-' + String(n).padStart(3, '0');
+      let id; do { id = rid(); } while (item(id));
       p = db.collection('items').doc(id).set({id, ...base, stock: total});
     }
     p.then(() => { closeDlg(); toast('Barang disimpan'); }).catch(dbErr);
@@ -526,7 +617,7 @@ if (db) auth.onAuthStateChanged(async u => {
   if (u && !u.isAnonymous) {
     try { admin = (await db.collection('admins').doc(u.uid).get()).exists; } catch (e) {}
     if (!admin) { toast('Akun ini bukan admin'); return auth.signOut(); }
-    unsub = [watch('items', a => { D.items = byId(a); snap(); }), watch('loans', a => { D.loans = byTs(a); snap(); })];
+    unsub = [watch('items', a => { D.items = byName(a); snap(); }), watch('loans', a => { D.loans = byTs(a); snap(); })];
   }
   ready = true; render(); hideSplash();
 });
