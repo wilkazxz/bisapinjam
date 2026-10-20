@@ -1,0 +1,17 @@
+{
+  "name": "BisaPINJAM",
+  "short_name": "BisaPINJAM",
+  "description": "Pinjam barang sekolah dengan QR",
+  "lang": "id",
+  "start_url": "index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#1f63c9",
+  "theme_color": "#1f63c9",
+  "icons": [
+    {"src": "icon.jpg", "sizes": "192x192", "type": "image/jpeg", "purpose": "any"},
+    {"src": "icon.jpg", "sizes": "512x512", "type": "image/jpeg", "purpose": "any"}
+  ],
+  "shortcuts": [{"name": "Masuk admin", "short_name": "Admin", "url": "admin.html"}]
+}
