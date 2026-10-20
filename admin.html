@@ -371,6 +371,28 @@ body[data-tod="sore"] .hd{background:radial-gradient(circle at 10% 100%,rgba(255
 .stp-i:first-child .stp-c em{background:#e5484d}
 .chip-late{color:var(--red)}
 .trk{display:block;width:100%;height:auto;margin:14px 0 0;stroke:none}
+/* ===== penyegaran dashboard admin: ringkasan bisa diketuk, pencarian rapi, kartu lebih bersih ===== */
+.stats{grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:18px}
+@media(min-width:640px){.stats{grid-template-columns:repeat(4,1fr)}}
+.sc{display:grid;grid-template-columns:auto 1fr;grid-template-areas:"i n" "i l";align-items:center;column-gap:12px;text-align:left;border:1px solid var(--edge);border-radius:18px;background:var(--soft);padding:14px;box-shadow:var(--shadow);transition:transform .15s,border-color .15s}
+.sc:hover{transform:translateY(-2px)}
+.sc i{grid-area:i;width:44px;height:44px;border-radius:14px;display:grid;place-items:center;background:var(--t);color:var(--c)}
+.sc i svg{width:22px;height:22px}
+.sc b{grid-area:n;font-size:1.55rem;line-height:1.1;font-weight:800;color:var(--ink)}
+.sc span{grid-area:l;font-size:.78rem;font-weight:600;color:var(--mute)}
+.sc-w{--c:#c98a00;--t:rgba(255,210,31,.24)}.sc-b{--c:#1f63c9;--t:rgba(31,99,201,.14)}.sc-l{--c:#e5484d;--t:rgba(229,72,77,.14)}.sc-s{--c:#1a9b6c;--t:rgba(26,155,108,.16)}
+.sc.hot{border-color:rgba(229,72,77,.5)}
+.tb{display:flex;gap:8px;margin:0 0 16px}
+.aqw{position:relative;flex:1;min-width:0}
+.aqw svg{position:absolute;left:14px;top:50%;width:18px;height:18px;margin-top:-9px;color:var(--mute);pointer-events:none}
+.aqw .aq{width:100%;min-height:48px;padding:12px 14px 12px 42px;border-radius:14px}
+.tb .btn{flex:none;min-height:48px;border-radius:14px;padding:0 16px}
+.tb .btn svg{width:18px;height:18px}
+.grid{gap:14px}
+.card{border:1px solid var(--edge);border-radius:18px}
+.card .row{gap:10px}
+.card .row .btn{min-height:44px;border-radius:12px;font-size:.88rem}
+.empty{border-radius:20px;padding:36px 20px}
 </style>
 </head>
 <body>
@@ -586,8 +608,9 @@ const stepper = n => {
 const views = {
   req: () => {
     const n = s => D.loans.filter(l => hit(l, s)).length;
-    return `<div class="stats"><div><b>${n('diajukan')}</b><span class="note">Menunggu</span></div><div><b>${n('dipinjam')}</b><span class="note">Dipinjam</span></div><div><b>${n('telat')}</b><span class="note">Terlambat</span></div><div><b>${D.items.reduce((a, i) => a + i.stock, 0)}</b><span class="note">Stok tersedia</span></div></div>
-<div class="row flush"><input id="aq" class="aq" type="search" placeholder="Cari nama, barang, atau kode" aria-label="Cari pinjaman" value="${esc(aterm)}"><button class="btn" data-act="csv">Ekspor CSV</button></div>
+    const SC = (k, f, n, l, p, hot) => `<button class="sc sc-${k}${hot ? ' hot' : ''}" ${f}><i><svg viewBox="0 0 24 24">${p}</svg></i><b>${n}</b><span>${l}</span></button>`;
+    return `<div class="stats">${SC('w', 'data-filt="diajukan"', n('diajukan'), 'Menunggu', '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>')}${SC('b', 'data-filt="dipinjam"', n('dipinjam'), 'Dipinjam', '<path d="M6 7h12l1 13H5z"/><path d="M9 7a3 3 0 0 1 6 0"/>')}${SC('l', 'data-filt="telat"', n('telat'), 'Terlambat', '<path d="M12 3l9.5 17h-19z"/><path d="M12 10v4M12 17.2v.01"/>', n('telat') > 0)}${SC('s', 'data-tab="stok"', D.items.reduce((a, i) => a + i.stock, 0), 'Stok tersedia', '<path d="M21 8l-9-5-9 5 9 5 9-5z"/><path d="M3 8v8l9 5 9-5V8M12 13v8"/>')}</div>
+<div class="tb"><div class="aqw"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><input id="aq" class="aq" type="search" placeholder="Cari nama, barang, atau kode" aria-label="Cari pinjaman" value="${esc(aterm)}"></div><button class="btn" data-act="csv" aria-label="Ekspor CSV"><svg viewBox="0 0 24 24"><path d="M12 4v11M7.5 10.5L12 15l4.5-4.5M5 20h14"/></svg>Ekspor</button></div>
 ${stepper(n)}
 <div class="grid" id="alist">${listHtml()}</div>`;
   },
@@ -620,8 +643,8 @@ function showQr(id) {
   q('#dlgBody').innerHTML = `<h2>${esc(i.name)}</h2><p class="note">${esc(i.id)}. Scan dengan kamera HP biasa atau menu Scan di halaman peminjam.</p><div class="qrbox" id="qrBox"></div><p class="small note" style="word-break:break-all">${esc(qrUrl(id))}</p><div class="row"><button class="btn" data-close>Tutup</button><button class="btn pri" data-copy="${esc(qrUrl(id))}">Salin tautan</button></div>`;
   q('#dlg').showModal(); new QRCode(q('#qrBox'), {text: qrUrl(id), width: 240, height: 240, correctLevel: QRCode.CorrectLevel.M});
 }
-const KAT = ['Komputer', 'Alat jaringan', 'Perangkat jaringan', 'Presentasi', 'Elektronik', 'Alat tulis'];
-const LOK = ['Lab Komputer', 'Lab Jaringan', 'Gudang', 'Perpustakaan', 'Ruang Guru', 'Bengkel'];
+const KAT = ['Elektronik', 'Komputer', 'Presentasi', 'Perlengkapan', 'Olahraga', 'Alat tulis'];
+const LOK = ['Gudang', 'Perpustakaan', 'Ruang Kelas', 'Ruang Guru', 'Kantor', 'Aula'];
 const uniq = l => l.filter((c, k) => c && l.indexOf(c) === k);
 const chipField = (name, label, opts, val, custom) => {
   const all = opts.concat(val && opts.indexOf(val) < 0 ? [val] : []);
