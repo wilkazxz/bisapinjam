@@ -331,6 +331,10 @@ body.printing #toast{display:none!important}
 .pwa-t b{font-size:.88rem}.pwa-t span{font-size:.76rem;color:#6b7f9c}
 .pwab{border:0;border-radius:10px;background:#1f63c9;color:#fff;font-weight:700;padding:9px 14px;flex:none}
 .pwa-x{border:0;background:none;color:#6b7f9c;font-size:1.4rem;line-height:1;padding:4px 6px;flex:none}
+
+/* ===== waktu posting & jam langsung ===== */
+.pdt{font-size:.7rem;color:var(--mute);margin:1px 0 0}
+.clk{text-align:center;color:rgba(255,255,255,.82);font-size:.74rem;font-weight:600;margin:-6px 0 12px}
 </style>
 </head>
 <body>
@@ -338,6 +342,7 @@ body.printing #toast{display:none!important}
 <div class="wrap">
   <div class="hd">
     <div class="top"><img class="logo" src="icon.jpg" alt="" onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'logo logo-fb',textContent:'B'}))"><h1>BisaPINJAM Admin<svg class="vb" viewBox="0 0 24 24" role="img" aria-label="Terverifikasi"><g fill="#1d9bf0" stroke="none"><rect x="3.2" y="3.2" width="17.6" height="17.6" rx="4.5"/><rect x="3.2" y="3.2" width="17.6" height="17.6" rx="4.5" transform="rotate(45 12 12)"/></g><path d="M8 12.4l2.8 2.8 5.2-5.6" fill="none" stroke="#fff" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/></svg></h1><a href="index.html">← Peminjam</a></div>
+    <div class="clk" id="clk"></div>
     <div class="seg" id="tabs"></div>
   </div>
   <div id="view" class="sheetc"></div>
@@ -391,6 +396,15 @@ const qrUrl = id => location.origin + location.pathname.replace(/[^/]*$/, '') + 
 const byName = a => a.sort((x, y) => String(x.name).localeCompare(String(y.name)));
 const rid = () => { const A = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789', r = crypto.getRandomValues(new Uint8Array(6)); return 'BRG-' + Array.from(r, x => A[x % A.length]).join(''); };
 const loadScript = (url, ok) => ok() ? Promise.resolve() : new Promise((res, rej) => { const el = document.createElement('script'); el.src = url; el.onload = res; el.onerror = () => rej(new Error('Gagal memuat pustaka')); document.head.appendChild(el); });
+const tzName = d => { const o = -d.getTimezoneOffset() / 60; return o === 7 ? 'WIB' : o === 8 ? 'WITA' : o === 9 ? 'WIT' : 'GMT' + (o >= 0 ? '+' : '') + o; };
+/* waktu lengkap: hari, tanggal, jam, menit, detik + zona waktu */
+const fts = (ts, short) => {
+  const d = new Date(ts); if (isNaN(d)) return '-';
+  const p = n => String(n).padStart(2, '0'), day = d.toLocaleDateString('id-ID', short ? {weekday: 'short', day: 'numeric', month: 'short', year: 'numeric'} : {weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'});
+  return day + (short ? ' · ' : ' pukul ') + p(d.getHours()) + '.' + p(d.getMinutes()) + '.' + p(d.getSeconds()) + ' ' + tzName(d);
+};
+const tick = () => { const c = q('#clk'); if (c) c.textContent = fts(Date.now(), true); };
+tick(); setInterval(tick, 1000);
 const strukOk = ['diajukan', 'disetujui', 'dipinjam', 'selesai'];
 const strukTitle = {diajukan: ['Pengajuan Terkirim', 'wait'], disetujui: ['Peminjaman Disetujui', 'ok'], dipinjam: ['Barang Sedang Dipinjam', 'ok'], selesai: ['Peminjaman Selesai', 'ok']};
 const fdt = d => d ? new Date(d + 'T00:00').toLocaleDateString('id-ID', {day: 'numeric', month: 'long', year: 'numeric'}) : '-';
@@ -405,10 +419,10 @@ function strukHtml(l) {
 <div class="sk-brand"><span>BisaPINJAM${VB}</span><small>Bukti Peminjaman Barang</small></div>
 <div class="sk-code">${esc(l.id)}</div>${ver ? `<p class="sk-ver">${VB}Terverifikasi oleh admin</p>` : ''}<hr>
 ${row('Barang', i.name)}${row('Jumlah', l.qty + ' unit')}${row('Peminjam', l.who)}${row('Kelas', l.kelas)}${row('Tujuan', l.purpose)}${row('Alamat', l.addr)}<hr>
-${row('Tgl pinjam', fdt(l.date))}${row('Rencana kembali', fdt(l.due))}${l.ret ? row('Dikembalikan', fdt(l.ret.date)) + row('Kondisi', l.ret.cond) : ''}${row('Catatan', l.note)}<hr>
+${row('Diajukan', l.ts ? fts(l.ts) : '')}${row('Tgl pinjam', fdt(l.date))}${row('Rencana kembali', fdt(l.due))}${l.ret ? row('Dikembalikan', fdt(l.ret.date)) + row('Kondisi', l.ret.cond) : ''}${row('Catatan', l.note)}<hr>
 ${sig ? `<div class="sk-sig"><img src="${esc(l.sig)}" alt="Tanda tangan peminjam"><span>${esc(l.who)}</span><small>Tanda tangan peminjam</small></div>` : ''}
 <div class="sk-qr" id="skQr"></div><p class="sk-note">Tunjukkan struk ini saat mengambil dan mengembalikan barang.</p>
-<p class="sk-foot">Dicetak ${new Date().toLocaleString('id-ID', {dateStyle: 'medium', timeStyle: 'short'})}</p></div>${zig(false)}</div></div>`;
+<p class="sk-foot">Dicetak ${fts(Date.now())}</p></div>${zig(false)}</div></div>`;
 }
 function showStruk(id) {
   const l = D.loans.find(x => x.id === id); if (!l) return;
@@ -452,7 +466,7 @@ const loanInfo = l => {
   const i = item(l.item) || {name: l.item}, [s, c] = STAT[l.status], late = l.status === 'dipinjam' && l.due < today();
   return `<div class="t"><span class="code">${esc(l.id)}</span><span class="st ${c}">${s}${['disetujui', 'dipinjam', 'selesai'].includes(l.status) ? VB : ''}</span></div>
 <h3>${esc(i.name)} × ${l.qty}</h3><p class="note">${esc(l.who)}${l.kelas ? ' (' + esc(l.kelas) + ')' : ''}, untuk ${esc(l.purpose)}</p>
-<p class="small">Pinjam ${fmt(l.date)}, kembali ${fmt(l.due)}${l.ret ? `, dikembalikan ${fmt(l.ret.date)} (${esc(l.ret.cond.toLowerCase())})` : ''}${late ? ' <b class="late">Terlambat</b>' : ''}</p>${l.addr ? `<p class="small note">Alamat: ${esc(l.addr)}</p>` : ''}${l.note ? `<p class="small note">Catatan admin: ${esc(l.note)}</p>` : ''}`;
+<p class="small">Pinjam ${fmt(l.date)}, kembali ${fmt(l.due)}${l.ret ? `, dikembalikan ${fmt(l.ret.date)} (${esc(l.ret.cond.toLowerCase())})` : ''}${late ? ' <b class="late">Terlambat</b>' : ''}</p>${l.ts ? `<p class="small note">Diajukan: ${fts(l.ts)}</p>` : ''}${l.addr ? `<p class="small note">Alamat: ${esc(l.addr)}</p>` : ''}${l.note ? `<p class="small note">Catatan admin: ${esc(l.note)}</p>` : ''}`;
 };
 
 </script>
@@ -504,7 +518,7 @@ const views = {
   },
   stok: () => `<div class="row flush"><button class="btn pri" data-act="baru">+ Tambah barang</button></div>
 <div class="grid">${D.items.length ? D.items.map(i => `<article class="card"><div class="t"><span class="code">${esc(i.id)}</span><span class="note">${esc(i.cat)}</span></div>
-<h3>${esc(i.name)}</h3><p class="note">${esc(i.loc)}, kondisi ${i.cond === 'Baik' ? 'baik' : '<b class="late">' + esc(i.cond.toLowerCase()) + '</b>'}</p><p class="small"><b>${i.stock}</b> tersedia dari ${i.total}${i.stock === 0 ? ' <b class="late">Habis</b>' : ''}</p>
+<h3>${esc(i.name)}</h3><p class="note">${esc(i.loc)}, kondisi ${i.cond === 'Baik' ? 'baik' : '<b class="late">' + esc(i.cond.toLowerCase()) + '</b>'}</p><p class="small note">Diposting: ${i.ts ? fts(i.ts) : 'waktu tidak tercatat'}</p><p class="small"><b>${i.stock}</b> tersedia dari ${i.total}${i.stock === 0 ? ' <b class="late">Habis</b>' : ''}</p>
 <div class="row"><button class="btn" data-qrshow="${esc(i.id)}">QR</button><button class="btn" data-edit="${esc(i.id)}">Ubah</button><button class="btn bad" data-del="${esc(i.id)}">Hapus</button></div></article>`).join('') : '<p class="empty">Belum ada barang. Tekan "+ Tambah barang" untuk mulai.</p>'}</div>`,
   qr: () => `<div class="row flush"><button class="btn pri" onclick="print()">Cetak semua label</button></div>
 <div class="qrs">${D.items.map(i => `<div class="lbl"><div class="q" data-qr="${esc(qrUrl(i.id))}"></div><b>${esc(i.name)}</b><span>${esc(i.id)}</span></div>`).join('') || '<p class="empty">Belum ada barang.</p>'}</div>`
@@ -650,7 +664,7 @@ document.addEventListener('submit', e => {
       p = db.collection('items').doc(i.id).update({...base, stock: total - out});
     } else {
       let id; do { id = rid(); } while (item(id));
-      p = db.collection('items').doc(id).set({id, ...base, stock: total});
+      p = db.collection('items').doc(id).set({id, ...base, stock: total, ts: Date.now()});
     }
     p.then(() => { closeDlg(); toast('Barang disimpan'); }).catch(dbErr);
   }
