@@ -6,6 +6,11 @@
 <meta name="theme-color" content="#1f63c9">
 <link rel="icon" type="image/jpeg" href="icon.jpg">
 <link rel="apple-touch-icon" href="icon.jpg">
+<link rel="manifest" href="manifest.json">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="BisaPINJAM">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="preload" as="image" href="splash.jpg">
 <style>#splash{position:fixed;top:0;right:0;bottom:0;left:0;z-index:9999;background:#1f63c9 url(splash.jpg) center/cover no-repeat;transition:opacity .4s}#splash.out{opacity:0;pointer-events:none}.nosplash #splash{display:none}</style>
 <script>
@@ -293,17 +298,46 @@ body.printing>*:not(#dlg){display:none!important}
 body.printing #dlg{position:static;display:block;width:auto;max-width:none;margin:0;background:none;border:0;animation:none;overflow:visible}
 body.printing .sheet{max-height:none;overflow:visible;padding:0;background:none}
 body.printing .sheet::before{display:none}
-body.printing .sheet>:not(.struk){display:none!important}
+body.printing .sheet>:not(.sk-wrap){display:none!important}
+body.printing .sk-wrap{background:none;padding:0}
+body.printing .sk-paper{max-width:380px}
+body.printing .sk-wrap *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
 body.printing #toast{display:none!important}
-body.printing .struk{max-width:380px;margin:0 auto;border:1px dashed #999;border-radius:0}
+
 }
+
+/* ===== penyempurnaan 3: struk bergerigi, tanda tangan, centang biru, lokasi, PWA ===== */
+[hidden]{display:none!important}
+.vb{width:18px;height:18px;display:inline-block;vertical-align:-3px;margin-left:5px;flex:none}
+.st .vb{width:14px;height:14px;vertical-align:-2px;margin-left:4px}
+.sk-wrap{background:#dbe8fb;border-radius:16px;padding:18px 14px;margin-top:4px}
+.sk-paper{max-width:380px;margin:0 auto}
+.zig{display:block;width:100%;height:10px}
+.struk{border:0;border-radius:0;margin:0;box-shadow:0 3px 8px rgba(13,43,94,.12)}
+.sk-brand .vb{width:16px;height:16px}
+.sk-ver{display:flex;align-items:center;justify-content:center;gap:2px;margin:8px 0 0;font-size:.78rem;font-weight:700;color:#1d9bf0}
+.sk-ver .vb{margin:0 4px 0 0;width:16px;height:16px;vertical-align:0}
+.sk-sig{text-align:center;margin:4px 0 8px}
+.sk-sig img{display:block;margin:0 auto;max-width:200px;max-height:80px;border-bottom:1.5px solid #0d2b5e}
+.sk-sig span{display:block;font-weight:700;margin-top:4px}
+.sk-sig small{color:#6b7f9c}
+.sig{display:block;width:100%;height:140px;touch-action:none;background:#fff;border:1.5px dashed var(--line);border-radius:12px;margin-top:4px;cursor:crosshair}
+.sig-h{font-size:.82rem;font-weight:600;color:var(--mute);margin-top:12px}
+.geo-ok{color:var(--ok)}
+.geomap{height:170px;margin-top:10px}
+.pwa{display:flex;align-items:center;gap:10px;background:#fff8dc;border:1px solid #ffe38a;border-radius:16px;padding:10px 12px;margin-bottom:14px;color:#0d2b5e}
+.pwa-i{width:40px;height:40px;border-radius:12px;background:#1f63c9;color:#fff;display:grid;place-items:center;flex:none}
+.pwa-t{flex:1;min-width:0;display:grid}
+.pwa-t b{font-size:.88rem}.pwa-t span{font-size:.76rem;color:#6b7f9c}
+.pwab{border:0;border-radius:10px;background:#1f63c9;color:#fff;font-weight:700;padding:9px 14px;flex:none}
+.pwa-x{border:0;background:none;color:#6b7f9c;font-size:1.4rem;line-height:1;padding:4px 6px;flex:none}
 </style>
 </head>
 <body>
 <div id="splash" aria-hidden="true"></div>
 <div class="wrap">
   <div class="hd">
-    <div class="top"><img class="logo" src="icon.jpg" alt="" onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'logo logo-fb',textContent:'B'}))"><h1>BisaPINJAM Admin</h1><a href="index.html">← Peminjam</a></div>
+    <div class="top"><img class="logo" src="icon.jpg" alt="" onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'logo logo-fb',textContent:'B'}))"><h1>BisaPINJAM Admin<svg class="vb" viewBox="0 0 24 24" role="img" aria-label="Terverifikasi"><g fill="#1d9bf0" stroke="none"><rect x="3.2" y="3.2" width="17.6" height="17.6" rx="4.5"/><rect x="3.2" y="3.2" width="17.6" height="17.6" rx="4.5" transform="rotate(45 12 12)"/></g><path d="M8 12.4l2.8 2.8 5.2-5.6" fill="none" stroke="#fff" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/></svg></h1><a href="index.html">← Peminjam</a></div>
     <div class="seg" id="tabs"></div>
   </div>
   <div id="view" class="sheetc"></div>
@@ -360,17 +394,21 @@ const loadScript = (url, ok) => ok() ? Promise.resolve() : new Promise((res, rej
 const strukOk = ['diajukan', 'disetujui', 'dipinjam', 'selesai'];
 const strukTitle = {diajukan: ['Pengajuan Terkirim', 'wait'], disetujui: ['Peminjaman Disetujui', 'ok'], dipinjam: ['Barang Sedang Dipinjam', 'ok'], selesai: ['Peminjaman Selesai', 'ok']};
 const fdt = d => d ? new Date(d + 'T00:00').toLocaleDateString('id-ID', {day: 'numeric', month: 'long', year: 'numeric'}) : '-';
+const VB = `<svg class="vb" viewBox="0 0 24 24" role="img" aria-label="Terverifikasi"><g fill="#1d9bf0" stroke="none"><rect x="3.2" y="3.2" width="17.6" height="17.6" rx="4.5"/><rect x="3.2" y="3.2" width="17.6" height="17.6" rx="4.5" transform="rotate(45 12 12)"/></g><path d="M8 12.4l2.8 2.8 5.2-5.6" fill="none" stroke="#fff" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+const zig = top => { let d = top ? 'M0 10' : 'M0 0'; for (let k = 0; k < 20; k++) d += top ? ` L${k * 10 + 5} 0 L${k * 10 + 10} 10` : ` L${k * 10 + 5} 10 L${k * 10 + 10} 0`; return `<svg class="zig" viewBox="0 0 200 10" preserveAspectRatio="none" aria-hidden="true"><path d="${d} Z" fill="#fff" stroke="none"/></svg>`; };
 function strukHtml(l) {
   const i = item(l.item) || {name: l.item}, [ttl, kind] = strukTitle[l.status] || ['Bukti Peminjaman', 'ok'];
   const row = (k, v) => v ? `<div class="sr"><span>${k}</span><b>${esc(v)}</b></div>` : '';
   const icon = kind === 'wait' ? '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>' : '<path d="M5 13l4 4L19 7"/>';
-  return `<div class="struk" id="struk"><div class="sk-top ${kind}"><div class="sk-ck"><svg viewBox="0 0 24 24" stroke-width="3">${icon}</svg></div><h3>${ttl}</h3><p>${esc(STAT[l.status][0])}</p></div>
-<div class="sk-brand"><span>BisaPINJAM</span><small>Bukti Peminjaman Barang</small></div>
-<div class="sk-code">${esc(l.id)}</div><hr>
+  const ver = ['disetujui', 'dipinjam', 'selesai'].includes(l.status), sig = l.sig && String(l.sig).startsWith('data:image/png;base64,');
+  return `<div class="sk-wrap" id="strukWrap"><div class="sk-paper">${zig(true)}<div class="struk" id="struk"><div class="sk-top ${kind}"><div class="sk-ck"><svg viewBox="0 0 24 24" stroke-width="3">${icon}</svg></div><h3>${ttl}</h3><p>${esc(STAT[l.status][0])}</p></div>
+<div class="sk-brand"><span>BisaPINJAM${VB}</span><small>Bukti Peminjaman Barang</small></div>
+<div class="sk-code">${esc(l.id)}</div>${ver ? `<p class="sk-ver">${VB}Terverifikasi oleh admin</p>` : ''}<hr>
 ${row('Barang', i.name)}${row('Jumlah', l.qty + ' unit')}${row('Peminjam', l.who)}${row('Kelas', l.kelas)}${row('Tujuan', l.purpose)}${row('Alamat', l.addr)}<hr>
 ${row('Tgl pinjam', fdt(l.date))}${row('Rencana kembali', fdt(l.due))}${l.ret ? row('Dikembalikan', fdt(l.ret.date)) + row('Kondisi', l.ret.cond) : ''}${row('Catatan', l.note)}<hr>
+${sig ? `<div class="sk-sig"><img src="${esc(l.sig)}" alt="Tanda tangan peminjam"><span>${esc(l.who)}</span><small>Tanda tangan peminjam</small></div>` : ''}
 <div class="sk-qr" id="skQr"></div><p class="sk-note">Tunjukkan struk ini saat mengambil dan mengembalikan barang.</p>
-<p class="sk-foot">Dicetak ${new Date().toLocaleString('id-ID', {dateStyle: 'medium', timeStyle: 'short'})}</p></div>`;
+<p class="sk-foot">Dicetak ${new Date().toLocaleString('id-ID', {dateStyle: 'medium', timeStyle: 'short'})}</p></div>${zig(false)}</div></div>`;
 }
 function showStruk(id) {
   const l = D.loans.find(x => x.id === id); if (!l) return;
@@ -381,30 +419,38 @@ function showStruk(id) {
 const printStruk = () => { document.body.classList.add('printing'); setTimeout(() => print(), 60); };
 addEventListener('afterprint', () => document.body.classList.remove('printing'));
 async function pdfStruk(id) {
-  const el = q('#struk'); if (!el) return;
+  const el = q('#strukWrap'); if (!el) return;
   toast('Menyiapkan PDF…');
   try {
     await loadScript('https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js', () => window.html2canvas);
     await loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js', () => window.jspdf);
-    const c = await html2canvas(el, {scale: 2, backgroundColor: '#ffffff'});
-    const W = 90, H = W * c.height / c.width, pdf = new window.jspdf.jsPDF({unit: 'mm', format: [W, H]});
+    const c = await html2canvas(el, {scale: 2, backgroundColor: '#dbe8fb'});
+    const W = 100, H = W * c.height / c.width, pdf = new window.jspdf.jsPDF({unit: 'mm', format: [W, H]});
     pdf.addImage(c.toDataURL('image/png'), 'PNG', 0, 0, W, H);
     pdf.save('struk-' + id + '.pdf'); toast('PDF tersimpan');
   } catch (e) { toast('PDF gagal dibuat. Pakai Cetak lalu pilih Simpan sebagai PDF'); }
 }
-function showMap(id) {
+const osmSrc = (la, ln, d = 0.003) => { la = +la; ln = +ln; return `https://www.openstreetmap.org/export/embed.html?bbox=${ln - d},${la - d * .7},${ln + d},${la + d * .7}&layer=mapnik&marker=${la},${ln}`; };
+const fetchJson = async (url, ms = 8000) => { const c = new AbortController(), t = setTimeout(() => c.abort(), ms); try { const r = await fetch(url, {signal: c.signal, headers: {Accept: 'application/json'}}); if (!r.ok) throw new Error('http ' + r.status); return await r.json(); } finally { clearTimeout(t); } };
+async function showMap(id) {
   const l = D.loans.find(x => x.id === id); if (!l) return;
-  const has = l.lat != null && l.lng != null, qy = has ? l.lat + ',' + l.lng : (l.addr || '');
+  let la = l.lat, ln = l.lng, gps = la != null && ln != null, exact = gps;
+  const gq = () => exact ? la + ',' + ln : (l.addr || '');
   q('#dlgBody').innerHTML = `<h2>Lokasi peminjam</h2><p class="note">${esc(l.who)}${l.kelas ? ' (' + esc(l.kelas) + ')' : ''}</p><p class="small">${esc(l.addr || 'Alamat tidak diisi')}</p>
-<iframe class="map" title="Peta lokasi peminjam" loading="lazy" referrerpolicy="no-referrer-when-downgrade" src="https://maps.google.com/maps?q=${encodeURIComponent(qy)}&z=${has ? 16 : 15}&output=embed"></iframe>
-<div class="row"><button class="btn" data-close>Tutup</button><a class="btn pri" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(qy)}">Buka di Google Maps</a></div>`;
+<p class="small note" id="mapst">Memuat peta…</p><div id="mapbox"></div>
+<div class="row"><button class="btn" data-close>Tutup</button><a class="btn pri" id="maplnk" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(gq())}">Buka di Google Maps</a></div>`;
   q('#dlg').showModal(); if (document.activeElement) document.activeElement.blur();
+  if (!exact && l.addr) { try { const r = await fetchJson('https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&countrycodes=id&q=' + encodeURIComponent(l.addr)); if (r && r[0]) { la = +r[0].lat; ln = +r[0].lon; exact = true; } } catch (e) {} }
+  const box = q('#mapbox'); if (!box) return;
+  box.innerHTML = `<iframe class="map" title="Peta lokasi peminjam" loading="lazy" referrerpolicy="no-referrer-when-downgrade" src="${exact ? osmSrc(la, ln) : 'https://maps.google.com/maps?q=' + encodeURIComponent(gq()) + '&z=15&output=embed'}"></iframe>`;
+  q('#mapst').textContent = gps ? 'Titik dari GPS peminjam.' : exact ? 'Titik diperkirakan dari alamat yang diketik.' : 'Peta dicari dari alamat yang diketik (perkiraan).';
+  const a = q('#maplnk'); if (a) a.href = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(gq());
 }
 
 const STAT = {diajukan:['Menunggu persetujuan','wait'], disetujui:['Disetujui, siap diambil','ok'], dipinjam:['Sedang dipinjam','ok'], selesai:['Selesai','done'], ditolak:['Ditolak','no'], dibatalkan:['Dibatalkan','no']};
 const loanInfo = l => {
   const i = item(l.item) || {name: l.item}, [s, c] = STAT[l.status], late = l.status === 'dipinjam' && l.due < today();
-  return `<div class="t"><span class="code">${esc(l.id)}</span><span class="st ${c}">${s}</span></div>
+  return `<div class="t"><span class="code">${esc(l.id)}</span><span class="st ${c}">${s}${['disetujui', 'dipinjam', 'selesai'].includes(l.status) ? VB : ''}</span></div>
 <h3>${esc(i.name)} × ${l.qty}</h3><p class="note">${esc(l.who)}${l.kelas ? ' (' + esc(l.kelas) + ')' : ''}, untuk ${esc(l.purpose)}</p>
 <p class="small">Pinjam ${fmt(l.date)}, kembali ${fmt(l.due)}${l.ret ? `, dikembalikan ${fmt(l.ret.date)} (${esc(l.ret.cond.toLowerCase())})` : ''}${late ? ' <b class="late">Terlambat</b>' : ''}</p>${l.addr ? `<p class="small note">Alamat: ${esc(l.addr)}</p>` : ''}${l.note ? `<p class="small note">Catatan admin: ${esc(l.note)}</p>` : ''}`;
 };
@@ -623,5 +669,6 @@ if (db) auth.onAuthStateChanged(async u => {
 });
 render();
 </script>
+<script>if ('serviceWorker' in navigator && /^https?:/.test(location.protocol)) addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));</script>
 </body>
 </html>
