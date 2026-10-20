@@ -6,6 +6,11 @@
 <meta name="theme-color" content="#1f63c9">
 <link rel="icon" type="image/jpeg" href="icon.jpg">
 <link rel="apple-touch-icon" href="icon.jpg">
+<link rel="manifest" href="manifest.json">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="BisaPINJAM">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="preload" as="image" href="splash.jpg">
 <style>#splash{position:fixed;top:0;right:0;bottom:0;left:0;z-index:9999;background:#1f63c9 url(splash.jpg) center/cover no-repeat;transition:opacity .4s}#splash.out{opacity:0;pointer-events:none}.nosplash #splash{display:none}</style>
 <script>
@@ -293,10 +298,39 @@ body.printing>*:not(#dlg){display:none!important}
 body.printing #dlg{position:static;display:block;width:auto;max-width:none;margin:0;background:none;border:0;animation:none;overflow:visible}
 body.printing .sheet{max-height:none;overflow:visible;padding:0;background:none}
 body.printing .sheet::before{display:none}
-body.printing .sheet>:not(.struk){display:none!important}
+body.printing .sheet>:not(.sk-wrap){display:none!important}
+body.printing .sk-wrap{background:none;padding:0}
+body.printing .sk-paper{max-width:380px}
+body.printing .sk-wrap *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
 body.printing #toast{display:none!important}
-body.printing .struk{max-width:380px;margin:0 auto;border:1px dashed #999;border-radius:0}
+
 }
+
+/* ===== penyempurnaan 3: struk bergerigi, tanda tangan, centang biru, lokasi, PWA ===== */
+[hidden]{display:none!important}
+.vb{width:18px;height:18px;display:inline-block;vertical-align:-3px;margin-left:5px;flex:none}
+.st .vb{width:14px;height:14px;vertical-align:-2px;margin-left:4px}
+.sk-wrap{background:#dbe8fb;border-radius:16px;padding:18px 14px;margin-top:4px}
+.sk-paper{max-width:380px;margin:0 auto}
+.zig{display:block;width:100%;height:10px}
+.struk{border:0;border-radius:0;margin:0;box-shadow:0 3px 8px rgba(13,43,94,.12)}
+.sk-brand .vb{width:16px;height:16px}
+.sk-ver{display:flex;align-items:center;justify-content:center;gap:2px;margin:8px 0 0;font-size:.78rem;font-weight:700;color:#1d9bf0}
+.sk-ver .vb{margin:0 4px 0 0;width:16px;height:16px;vertical-align:0}
+.sk-sig{text-align:center;margin:4px 0 8px}
+.sk-sig img{display:block;margin:0 auto;max-width:200px;max-height:80px;border-bottom:1.5px solid #0d2b5e}
+.sk-sig span{display:block;font-weight:700;margin-top:4px}
+.sk-sig small{color:#6b7f9c}
+.sig{display:block;width:100%;height:140px;touch-action:none;background:#fff;border:1.5px dashed var(--line);border-radius:12px;margin-top:4px;cursor:crosshair}
+.sig-h{font-size:.82rem;font-weight:600;color:var(--mute);margin-top:12px}
+.geo-ok{color:var(--ok)}
+.geomap{height:170px;margin-top:10px}
+.pwa{display:flex;align-items:center;gap:10px;background:#fff8dc;border:1px solid #ffe38a;border-radius:16px;padding:10px 12px;margin-bottom:14px;color:#0d2b5e}
+.pwa-i{width:40px;height:40px;border-radius:12px;background:#1f63c9;color:#fff;display:grid;place-items:center;flex:none}
+.pwa-t{flex:1;min-width:0;display:grid}
+.pwa-t b{font-size:.88rem}.pwa-t span{font-size:.76rem;color:#6b7f9c}
+.pwab{border:0;border-radius:10px;background:#1f63c9;color:#fff;font-weight:700;padding:9px 14px;flex:none}
+.pwa-x{border:0;background:none;color:#6b7f9c;font-size:1.4rem;line-height:1;padding:4px 6px;flex:none}
 </style>
 </head>
 <body>
@@ -353,17 +387,21 @@ const loadScript = (url, ok) => ok() ? Promise.resolve() : new Promise((res, rej
 const strukOk = ['diajukan', 'disetujui', 'dipinjam', 'selesai'];
 const strukTitle = {diajukan: ['Pengajuan Terkirim', 'wait'], disetujui: ['Peminjaman Disetujui', 'ok'], dipinjam: ['Barang Sedang Dipinjam', 'ok'], selesai: ['Peminjaman Selesai', 'ok']};
 const fdt = d => d ? new Date(d + 'T00:00').toLocaleDateString('id-ID', {day: 'numeric', month: 'long', year: 'numeric'}) : '-';
+const VB = `<svg class="vb" viewBox="0 0 24 24" role="img" aria-label="Terverifikasi"><g fill="#1d9bf0" stroke="none"><rect x="3.2" y="3.2" width="17.6" height="17.6" rx="4.5"/><rect x="3.2" y="3.2" width="17.6" height="17.6" rx="4.5" transform="rotate(45 12 12)"/></g><path d="M8 12.4l2.8 2.8 5.2-5.6" fill="none" stroke="#fff" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+const zig = top => { let d = top ? 'M0 10' : 'M0 0'; for (let k = 0; k < 20; k++) d += top ? ` L${k * 10 + 5} 0 L${k * 10 + 10} 10` : ` L${k * 10 + 5} 10 L${k * 10 + 10} 0`; return `<svg class="zig" viewBox="0 0 200 10" preserveAspectRatio="none" aria-hidden="true"><path d="${d} Z" fill="#fff" stroke="none"/></svg>`; };
 function strukHtml(l) {
   const i = item(l.item) || {name: l.item}, [ttl, kind] = strukTitle[l.status] || ['Bukti Peminjaman', 'ok'];
   const row = (k, v) => v ? `<div class="sr"><span>${k}</span><b>${esc(v)}</b></div>` : '';
   const icon = kind === 'wait' ? '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>' : '<path d="M5 13l4 4L19 7"/>';
-  return `<div class="struk" id="struk"><div class="sk-top ${kind}"><div class="sk-ck"><svg viewBox="0 0 24 24" stroke-width="3">${icon}</svg></div><h3>${ttl}</h3><p>${esc(STAT[l.status][0])}</p></div>
-<div class="sk-brand"><span>BisaPINJAM</span><small>Bukti Peminjaman Barang</small></div>
-<div class="sk-code">${esc(l.id)}</div><hr>
+  const ver = ['disetujui', 'dipinjam', 'selesai'].includes(l.status), sig = l.sig && String(l.sig).startsWith('data:image/png;base64,');
+  return `<div class="sk-wrap" id="strukWrap"><div class="sk-paper">${zig(true)}<div class="struk" id="struk"><div class="sk-top ${kind}"><div class="sk-ck"><svg viewBox="0 0 24 24" stroke-width="3">${icon}</svg></div><h3>${ttl}</h3><p>${esc(STAT[l.status][0])}</p></div>
+<div class="sk-brand"><span>BisaPINJAM${VB}</span><small>Bukti Peminjaman Barang</small></div>
+<div class="sk-code">${esc(l.id)}</div>${ver ? `<p class="sk-ver">${VB}Terverifikasi oleh admin</p>` : ''}<hr>
 ${row('Barang', i.name)}${row('Jumlah', l.qty + ' unit')}${row('Peminjam', l.who)}${row('Kelas', l.kelas)}${row('Tujuan', l.purpose)}${row('Alamat', l.addr)}<hr>
 ${row('Tgl pinjam', fdt(l.date))}${row('Rencana kembali', fdt(l.due))}${l.ret ? row('Dikembalikan', fdt(l.ret.date)) + row('Kondisi', l.ret.cond) : ''}${row('Catatan', l.note)}<hr>
+${sig ? `<div class="sk-sig"><img src="${esc(l.sig)}" alt="Tanda tangan peminjam"><span>${esc(l.who)}</span><small>Tanda tangan peminjam</small></div>` : ''}
 <div class="sk-qr" id="skQr"></div><p class="sk-note">Tunjukkan struk ini saat mengambil dan mengembalikan barang.</p>
-<p class="sk-foot">Dicetak ${new Date().toLocaleString('id-ID', {dateStyle: 'medium', timeStyle: 'short'})}</p></div>`;
+<p class="sk-foot">Dicetak ${new Date().toLocaleString('id-ID', {dateStyle: 'medium', timeStyle: 'short'})}</p></div>${zig(false)}</div></div>`;
 }
 function showStruk(id) {
   const l = D.loans.find(x => x.id === id); if (!l) return;
@@ -374,30 +412,38 @@ function showStruk(id) {
 const printStruk = () => { document.body.classList.add('printing'); setTimeout(() => print(), 60); };
 addEventListener('afterprint', () => document.body.classList.remove('printing'));
 async function pdfStruk(id) {
-  const el = q('#struk'); if (!el) return;
+  const el = q('#strukWrap'); if (!el) return;
   toast('Menyiapkan PDF…');
   try {
     await loadScript('https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js', () => window.html2canvas);
     await loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js', () => window.jspdf);
-    const c = await html2canvas(el, {scale: 2, backgroundColor: '#ffffff'});
-    const W = 90, H = W * c.height / c.width, pdf = new window.jspdf.jsPDF({unit: 'mm', format: [W, H]});
+    const c = await html2canvas(el, {scale: 2, backgroundColor: '#dbe8fb'});
+    const W = 100, H = W * c.height / c.width, pdf = new window.jspdf.jsPDF({unit: 'mm', format: [W, H]});
     pdf.addImage(c.toDataURL('image/png'), 'PNG', 0, 0, W, H);
     pdf.save('struk-' + id + '.pdf'); toast('PDF tersimpan');
   } catch (e) { toast('PDF gagal dibuat. Pakai Cetak lalu pilih Simpan sebagai PDF'); }
 }
-function showMap(id) {
+const osmSrc = (la, ln, d = 0.003) => { la = +la; ln = +ln; return `https://www.openstreetmap.org/export/embed.html?bbox=${ln - d},${la - d * .7},${ln + d},${la + d * .7}&layer=mapnik&marker=${la},${ln}`; };
+const fetchJson = async (url, ms = 8000) => { const c = new AbortController(), t = setTimeout(() => c.abort(), ms); try { const r = await fetch(url, {signal: c.signal, headers: {Accept: 'application/json'}}); if (!r.ok) throw new Error('http ' + r.status); return await r.json(); } finally { clearTimeout(t); } };
+async function showMap(id) {
   const l = D.loans.find(x => x.id === id); if (!l) return;
-  const has = l.lat != null && l.lng != null, qy = has ? l.lat + ',' + l.lng : (l.addr || '');
+  let la = l.lat, ln = l.lng, gps = la != null && ln != null, exact = gps;
+  const gq = () => exact ? la + ',' + ln : (l.addr || '');
   q('#dlgBody').innerHTML = `<h2>Lokasi peminjam</h2><p class="note">${esc(l.who)}${l.kelas ? ' (' + esc(l.kelas) + ')' : ''}</p><p class="small">${esc(l.addr || 'Alamat tidak diisi')}</p>
-<iframe class="map" title="Peta lokasi peminjam" loading="lazy" referrerpolicy="no-referrer-when-downgrade" src="https://maps.google.com/maps?q=${encodeURIComponent(qy)}&z=${has ? 16 : 15}&output=embed"></iframe>
-<div class="row"><button class="btn" data-close>Tutup</button><a class="btn pri" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(qy)}">Buka di Google Maps</a></div>`;
+<p class="small note" id="mapst">Memuat peta…</p><div id="mapbox"></div>
+<div class="row"><button class="btn" data-close>Tutup</button><a class="btn pri" id="maplnk" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(gq())}">Buka di Google Maps</a></div>`;
   q('#dlg').showModal(); if (document.activeElement) document.activeElement.blur();
+  if (!exact && l.addr) { try { const r = await fetchJson('https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&countrycodes=id&q=' + encodeURIComponent(l.addr)); if (r && r[0]) { la = +r[0].lat; ln = +r[0].lon; exact = true; } } catch (e) {} }
+  const box = q('#mapbox'); if (!box) return;
+  box.innerHTML = `<iframe class="map" title="Peta lokasi peminjam" loading="lazy" referrerpolicy="no-referrer-when-downgrade" src="${exact ? osmSrc(la, ln) : 'https://maps.google.com/maps?q=' + encodeURIComponent(gq()) + '&z=15&output=embed'}"></iframe>`;
+  q('#mapst').textContent = gps ? 'Titik dari GPS peminjam.' : exact ? 'Titik diperkirakan dari alamat yang diketik.' : 'Peta dicari dari alamat yang diketik (perkiraan).';
+  const a = q('#maplnk'); if (a) a.href = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(gq());
 }
 
 const STAT = {diajukan:['Menunggu persetujuan','wait'], disetujui:['Disetujui, siap diambil','ok'], dipinjam:['Sedang dipinjam','ok'], selesai:['Selesai','done'], ditolak:['Ditolak','no'], dibatalkan:['Dibatalkan','no']};
 const loanInfo = l => {
   const i = item(l.item) || {name: l.item}, [s, c] = STAT[l.status], late = l.status === 'dipinjam' && l.due < today();
-  return `<div class="t"><span class="code">${esc(l.id)}</span><span class="st ${c}">${s}</span></div>
+  return `<div class="t"><span class="code">${esc(l.id)}</span><span class="st ${c}">${s}${['disetujui', 'dipinjam', 'selesai'].includes(l.status) ? VB : ''}</span></div>
 <h3>${esc(i.name)} × ${l.qty}</h3><p class="note">${esc(l.who)}${l.kelas ? ' (' + esc(l.kelas) + ')' : ''}, untuk ${esc(l.purpose)}</p>
 <p class="small">Pinjam ${fmt(l.date)}, kembali ${fmt(l.due)}${l.ret ? `, dikembalikan ${fmt(l.ret.date)} (${esc(l.ret.cond.toLowerCase())})` : ''}${late ? ' <b class="late">Terlambat</b>' : ''}</p>${l.addr ? `<p class="small note">Alamat: ${esc(l.addr)}</p>` : ''}${l.note ? `<p class="small note">Catatan admin: ${esc(l.note)}</p>` : ''}`;
 };
@@ -435,9 +481,20 @@ const EMO = {'Komputer':'laptop', 'Alat jaringan':'wrench', 'Perangkat jaringan'
 const catList = () => [...[...new Set(D.items.map(i => i.cat))].slice(0, 4).map(c => [c, EMO[c] || 'box', c]), ['Semua', 'tag', '']];
 
 let tab = 'home', term = '', cat = '', onlyFav = false, flt = 'all', me = '', kelas = '', okOnly = false, hist = false;
-let addr = '';
+let addr = '', addrDirty = false, geoBusy = false, deferredPrompt = null;
 try { me = localStorage.getItem('pp-me') || ''; kelas = localStorage.getItem('pp-kelas') || ''; addr = localStorage.getItem('pp-addr') || ''; } catch (e) {}
 
+const isStandalone = () => matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+const pwaDismissed = () => { try { return localStorage.getItem('pp-pwa') === '1'; } catch (e) { return false; } };
+const pwaBanner = () => (!isStandalone() && !pwaDismissed() && (deferredPrompt || isIOS)) ? `<div class="pwa"><div class="pwa-i">${ic('home')}</div><div class="pwa-t"><b>Pasang di layar utama</b><span>Buka lebih cepat seperti aplikasi.</span></div><button class="pwab" data-pwa>Pasang</button><button class="pwa-x" data-pwax aria-label="Tutup">×</button></div>` : '';
+addEventListener('beforeinstallprompt', e => { e.preventDefault(); deferredPrompt = e; if (ready && tab === 'home') render(true); });
+addEventListener('appinstalled', () => { deferredPrompt = null; toast('Aplikasi terpasang'); if (tab === 'home') render(true); });
+async function pwaInstall() {
+  if (deferredPrompt) { deferredPrompt.prompt(); try { await deferredPrompt.userChoice; } catch (e) {} deferredPrompt = null; render(true); return; }
+  q('#dlgBody').innerHTML = `<h2>Pasang di layar utama</h2><p class="note">Di iPhone atau iPad: ketuk tombol <b>Bagikan</b> di Safari, lalu pilih <b>Tambah ke Layar Utama</b>.</p><div class="row"><button class="btn pri" data-close>Mengerti</button></div>`;
+  q('#dlg').showModal();
+}
 const photo = (src, emo, alt, cls = '') => `<div class="ph ${cls}"><span class="ico">${ic(emo)}</span>${src ? `<img src="${esc(src)}" alt="${esc(alt)}" loading="${cls.includes('eager') ? 'eager' : 'lazy'}" decoding="async" onerror="this.remove()">` : ''}</div>`;
 const card = i => `<article class="pc"><button class="fav" data-fav="${esc(i.id)}" aria-pressed="${favs.has(i.id)}" aria-label="Tandai ${esc(i.name)} sebagai favorit">${ic('heart')}</button>
 <button class="pcb" data-open="${esc(i.id)}">${photo(i.img, EMO[i.cat] || 'box', i.name)}${i.stock ? `<span class="nb">${i.stock}</span>` : ''}<h4>${esc(i.name)}</h4>
@@ -454,10 +511,10 @@ const views = {
   home: () => {
     const hot = [...D.items].filter(i => flt === 'all' || i.stock).sort((a, b) => (b.total - b.stock) - (a.total - a.stock)).slice(0, 4);
     const n = mineActive().length;
-    return `<div class="hd"><div class="top"><img class="logo" src="icon.jpg" alt="" onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'logo logo-fb',textContent:'B'}))"><div class="ttl"><span class="word">BisaPINJAM</span><span class="hi">Halo, ${esc(me || 'Peminjam')}</span></div><div style="display:flex"><button class="ibtn" data-heart aria-label="Barang favorit">${ic('heart')}</button><button class="ibtn" data-tab="mine" aria-label="Pinjaman saya">${ic('bag')}${n ? `<span class="badge">${n}</span>` : ''}</button></div></div>
+    return `<div class="hd"><div class="top"><img class="logo" src="icon.jpg" alt="" onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'logo logo-fb',textContent:'B'}))"><div class="ttl"><span class="word">BisaPINJAM${VB}</span><span class="hi">Halo, ${esc(me || 'Peminjam')}</span></div><div style="display:flex"><button class="ibtn" data-heart aria-label="Barang favorit">${ic('heart')}</button><button class="ibtn" data-tab="mine" aria-label="Pinjaman saya">${ic('bag')}${n ? `<span class="badge">${n}</span>` : ''}</button></div></div>
 ${seg()}
 <form class="search" id="hs">${ic('search')}<input id="hq" type="search" placeholder="Cari nama atau kode barang" aria-label="Cari barang"><button type="button" class="flt" data-tab="barang" aria-label="Lihat semua barang">${ic('sliders')}</button></form></div>
-<div class="sheetc"><div class="quick"><button data-tab="scan"><i class="q1">${ic('qr')}</i>Scan QR</button><button data-tab="barang"><i class="q2">${ic('grid')}</i>Barang</button><button data-heart><i class="q3">${ic('heart')}</i>Favorit</button><button data-tab="mine"><i class="q4">${ic('bag')}</i>Pinjaman</button></div>
+<div class="sheetc">${pwaBanner()}<div class="quick"><button data-tab="scan"><i class="q1">${ic('qr')}</i>Scan QR</button><button data-tab="barang"><i class="q2">${ic('grid')}</i>Barang</button><button data-heart><i class="q3">${ic('heart')}</i>Favorit</button><button data-tab="mine"><i class="q4">${ic('bag')}</i>Pinjaman</button></div>
 <section class="hero"><div><span class="pill">Baru</span><h2>Pinjam alat praktik</h2><p>Scan QR di barang atau pilih dari daftar untuk mulai meminjam.</p><button class="dark" data-tab="scan">${ic('qr')}Scan sekarang</button></div>${photo('stok1.jpg', 'tag', '', 'eager')}</section>
 <div class="stat3"><div>${ic('box')}<b>${D.items.length}</b><span>Barang</span></div><div>${ic('check')}<b>${D.items.filter(i => i.stock).length}</b><span>Tersedia</span></div><div>${ic('clock')}<b>${n}</b><span>Pinjamanku</span></div></div>
 <div class="sec"><h3>${ic('grid')}Kategori</h3><button data-tab="barang">Lihat semua</button></div>
@@ -516,14 +573,64 @@ function borrow(raw) {
 <form id="bf" data-id="${esc(i.id)}"><label>Nama peminjam<input name="who" required autocomplete="name" value="${esc(me)}"></label>
 <label>Kelas<input name="kelas" required value="${esc(kelas)}" placeholder="Contoh: XI TKJ 1"></label>
 <label>Alamat lengkap<input name="addr" required autocomplete="street-address" value="${esc(addr)}" placeholder="Contoh: Jl. Sudirman No. 10, Pekanbaru"></label>
-<div class="row" style="margin-top:8px"><button type="button" class="btn" data-geo>${ic('pin')}Pakai lokasi saya</button></div><input type="hidden" name="lat"><input type="hidden" name="lng"><p class="small note" id="geost">GPS opsional, supaya admin bisa melihat peta lokasi.</p>
+<div class="row" style="margin-top:8px"><button type="button" class="btn" id="geob" data-geo>${ic('pin')}<span>Pakai lokasi saya</span></button><button type="button" class="btn bad" id="geox" data-geoclear hidden>Hapus lokasi</button></div>
+<input type="hidden" name="lat"><input type="hidden" name="lng">
+<p class="small note" id="geost" role="status">GPS opsional. Alamat terisi otomatis dan admin bisa melihat peta.</p>
+<iframe class="map geomap" id="geomap" title="Pratinjau lokasi" hidden></iframe>
 <label>Jumlah<div class="qty"><button type="button" data-qty="-1" aria-label="Kurangi">−</button><input name="qty" type="number" min="1" max="${i.stock}" value="1" required inputmode="numeric"><button type="button" data-qty="1" aria-label="Tambah">+</button></div></label>
 <label>Tujuan<input name="purpose" required placeholder="Contoh: praktik jaringan kelas XI"></label>
 <label>Rencana kembali (maks. 14 hari)<input name="due" type="date" min="${today()}" max="${addDays(14)}" value="${addDays(3)}" required></label>
+<div class="sig-h">Tanda tangan peminjam</div><canvas class="sig" id="sig" aria-label="Kotak tanda tangan"></canvas>
+<div class="row" style="margin-top:6px"><button type="button" class="btn" data-sigclear>Hapus tanda tangan</button></div>
 <p class="small late" id="bferr" role="alert"></p>
 <div class="row"><button type="button" class="btn" data-close>Batal</button><button class="btn pri" id="bsub">Ajukan peminjaman</button></div></form>`;
   q('#dlg').showModal(); if (document.activeElement) document.activeElement.blur();
+  addrDirty = false; geoBusy = false; sigInit();
 }
+
+/* tanda tangan digital (digambar di layar) */
+function sigInit() {
+  const c = q('#sig'); if (!c) return;
+  const r = Math.min(2, devicePixelRatio || 1), w = c.clientWidth || 300, h = c.clientHeight || 140;
+  c.width = Math.round(w * r); c.height = Math.round(h * r); c.dataset.has = '';
+  const x = c.getContext('2d'); x.scale(r, r); x.lineWidth = 2.4; x.lineCap = x.lineJoin = 'round'; x.strokeStyle = x.fillStyle = '#0d2b5e';
+  let on = false, lx = 0, ly = 0;
+  const pt = e => { const b = c.getBoundingClientRect(); return [e.clientX - b.left, e.clientY - b.top]; };
+  c.onpointerdown = e => { e.preventDefault(); on = true; try { c.setPointerCapture(e.pointerId); } catch (x2) {} [lx, ly] = pt(e); x.beginPath(); x.arc(lx, ly, 1.2, 0, 7); x.fill(); c.dataset.has = '1'; };
+  c.onpointermove = e => { if (!on) return; e.preventDefault(); const [px, py] = pt(e); x.beginPath(); x.moveTo(lx, ly); x.lineTo(px, py); x.stroke(); lx = px; ly = py; };
+  c.onpointerup = c.onpointercancel = () => { on = false; };
+}
+const sigClear = () => { const c = q('#sig'); if (!c) return; const x = c.getContext('2d'); x.save(); x.setTransform(1, 0, 0, 1, 0, 0); x.clearRect(0, 0, c.width, c.height); x.restore(); c.dataset.has = ''; };
+const sigData = () => { const c = q('#sig'); if (!c || c.dataset.has !== '1') return ''; const t = document.createElement('canvas'); t.width = 300; t.height = Math.round(300 * c.height / c.width); t.getContext('2d').drawImage(c, 0, 0, t.width, t.height); return t.toDataURL('image/png'); };
+/* lokasi: aman dari error izin, timeout, dan koneksi tidak aman; alamat terisi otomatis */
+const setGeo = (m, cls = 'note') => { const s = q('#geost'); if (s) { s.textContent = m; s.className = 'small ' + cls; } };
+async function geoFill() {
+  if (geoBusy) return;
+  if (!window.isSecureContext) return setGeo('Lokasi butuh koneksi aman (https). Ketik alamat secara manual.', 'late');
+  if (!navigator.geolocation) return setGeo('Browser ini tidak mendukung lokasi. Ketik alamat secara manual.', 'late');
+  const btn = q('#geob'); geoBusy = true; if (btn) btn.disabled = true; setGeo('Mencari lokasi, mohon izinkan akses lokasi…');
+  const get = o => new Promise((ok, no) => navigator.geolocation.getCurrentPosition(ok, no, o));
+  try {
+    let p;
+    try { p = await get({enableHighAccuracy: true, timeout: 10000, maximumAge: 30000}); }
+    catch (e) { if (e && e.code === 1) throw e; setGeo('Mencoba cara lain…'); p = await get({enableHighAccuracy: false, timeout: 15000, maximumAge: 120000}); }
+    const f = q('#bf'); if (!f) return;
+    const lat = p.coords.latitude, lng = p.coords.longitude;
+    f.elements.lat.value = lat.toFixed(6); f.elements.lng.value = lng.toFixed(6);
+    setGeo('Lokasi terpasang (akurasi ±' + Math.round(p.coords.accuracy) + ' m)', 'geo-ok');
+    const m = q('#geomap'); if (m) { m.src = osmSrc(lat, lng); m.hidden = false; }
+    const gx = q('#geox'); if (gx) gx.hidden = false;
+    const sp = q('#geob span'); if (sp) sp.textContent = 'Perbarui lokasi';
+    try {
+      const d = await fetchJson('https://nominatim.openstreetmap.org/reverse?format=jsonv2&accept-language=id&zoom=18&lat=' + lat + '&lon=' + lng);
+      const a = q('#bf') && q('#bf').elements.addr;
+      if (d && d.display_name && a && (!addrDirty || !a.value.trim())) { a.value = d.display_name; addrDirty = false; setGeo('Lokasi terpasang dan alamat terisi otomatis. Periksa lalu perbaiki jika perlu.', 'geo-ok'); }
+    } catch (e) { const a = q('#bf') && q('#bf').elements.addr; if (a && !a.value.trim()) setGeo('Lokasi terpasang, tapi alamat belum bisa terisi otomatis. Ketik alamat Anda.', 'late'); }
+  } catch (e) {
+    setGeo(e && e.code === 1 ? 'Izin lokasi ditolak. Izinkan lokasi di pengaturan browser, atau ketik alamat manual.' : e && e.code === 2 ? 'Lokasi tidak tersedia. Pastikan GPS menyala, atau ketik alamat manual.' : 'Pencarian lokasi terlalu lama. Coba lagi di tempat terbuka, atau ketik alamat manual.', 'late');
+  } finally { geoBusy = false; const b = q('#geob'); if (b) b.disabled = false; }
+}
+const geoClear = () => { const f = q('#bf'); if (!f) return; f.elements.lat.value = ''; f.elements.lng.value = ''; const m = q('#geomap'); if (m) { m.hidden = true; m.removeAttribute('src'); } const x = q('#geox'); if (x) x.hidden = true; const sp = q('#geob span'); if (sp) sp.textContent = 'Pakai lokasi saya'; setGeo('Lokasi dihapus. Alamat tetap bisa diketik manual.'); };
 
 document.addEventListener('click', e => {
   const t = e.target.closest('button,a'); if (!t) return;
@@ -536,12 +643,11 @@ document.addEventListener('click', e => {
   else if (d.struk) showStruk(d.struk);
   else if ('print' in d) printStruk();
   else if (d.pdf) pdfStruk(d.pdf);
-  else if ('geo' in d) {
-    if (!navigator.geolocation) return toast('Perangkat tidak mendukung lokasi');
-    q('#geost').textContent = 'Mencari lokasi…';
-    navigator.geolocation.getCurrentPosition(p => { q('#bf [name="lat"]').value = p.coords.latitude.toFixed(6); q('#bf [name="lng"]').value = p.coords.longitude.toFixed(6); q('#geost').textContent = 'Lokasi terpasang (akurasi ±' + Math.round(p.coords.accuracy) + ' m)'; },
-      () => { q('#geost').textContent = 'Lokasi tidak diizinkan. Cukup isi alamat saja.'; }, {enableHighAccuracy: true, timeout: 12000});
-  }
+  else if ('geo' in d) geoFill();
+  else if ('geoclear' in d) geoClear();
+  else if ('sigclear' in d) sigClear();
+  else if ('pwa' in d) pwaInstall();
+  else if ('pwax' in d) { try { localStorage.setItem('pp-pwa', '1'); } catch (x) {} render(true); }
   else if ('scango' in d) { closeDlg(); go('scan'); }
   else if (d.pinjam) { closeDlg(); borrow(d.pinjam); }
   else if (d.copy) navigator.clipboard.writeText(d.copy).then(() => toast('Tautan disalin')).catch(() => toast('Gagal menyalin'));
@@ -559,6 +665,7 @@ document.addEventListener('click', e => {
 });
 let rafS = 0;
 document.addEventListener('input', e => {
+  if (e.target.name === 'addr') addrDirty = true;
   if (e.target.id === 'search') { term = e.target.value; cancelAnimationFrame(rafS); rafS = requestAnimationFrame(() => { const l = q('#list'); if (l) l.innerHTML = gridHtml(filtered()); }); }
 });
 document.addEventListener('submit', e => {
@@ -574,6 +681,7 @@ document.addEventListener('submit', e => {
     if (!i || !(n >= 1)) return fail('Jumlah tidak valid');
     if (n > i.stock) return fail('Jumlah melebihi stok tersedia (' + i.stock + ')');
     if (v.due < today() || v.due > addDays(14)) return fail('Tanggal kembali maksimal 14 hari dari hari ini');
+    const sig = sigData(); if (!sig) return fail('Tanda tangan dulu di kotak yang tersedia');
     me = v.who.trim(); kelas = v.kelas.trim(); addr = v.addr.trim(); try { localStorage.setItem('pp-me', me); localStorage.setItem('pp-kelas', kelas); localStorage.setItem('pp-addr', addr); } catch (x) {}
     const id = f.dataset.trx = f.dataset.trx || 'TRX-' + Math.random().toString(36).slice(2, 7).toUpperCase(); /* id sama saat coba ulang, tidak dobel */
     sb.disabled = true; sb.textContent = 'Mengirim…';
@@ -582,7 +690,7 @@ document.addEventListener('submit', e => {
         if (!auth.currentUser) await auth.signInAnonymously();
         const u = auth.currentUser; if (!u) throw {code: 'unavailable'};
         await Promise.race([
-          db.collection('loans').doc(id).set({id, item: i.id, qty: n, who: me, kelas, addr, ...(v.lat && v.lng ? {lat: +v.lat, lng: +v.lng} : {}), purpose: v.purpose.trim(), date: today(), due: v.due, status: 'diajukan', uid: u.uid, ts: Date.now()}),
+          db.collection('loans').doc(id).set({id, item: i.id, qty: n, who: me, kelas, addr, sig, ...(v.lat && v.lng ? {lat: +v.lat, lng: +v.lng} : {}), purpose: v.purpose.trim(), date: today(), due: v.due, status: 'diajukan', uid: u.uid, ts: Date.now()}),
           new Promise((_, no) => setTimeout(() => no({code: 'timeout'}), 15000))
         ]);
         closeDlg(); hist = false; go('mine'); toast('Permintaan terkirim, menunggu admin');
@@ -632,5 +740,6 @@ else {
   });
 }
 </script>
+<script>if ('serviceWorker' in navigator && /^https?:/.test(location.protocol)) addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));</script>
 </body>
 </html>
