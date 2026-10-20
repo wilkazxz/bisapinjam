@@ -3,16 +3,20 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#2f7cf6">
+<meta name="theme-color" content="#2a74dc">
 <link rel="icon" type="image/jpeg" href="icon.jpg">
 <link rel="apple-touch-icon" href="icon.jpg">
 <link rel="preload" as="image" href="splash.jpg">
-<style>#splash{position:fixed;inset:0;z-index:9999;background:#2f7cf6 url(splash.jpg) center/cover no-repeat;transition:opacity .4s}#splash.out{opacity:0;pointer-events:none}.nosplash #splash{display:none}</style>
+<style>#splash{position:fixed;top:0;right:0;bottom:0;left:0;z-index:9999;background:#1f63c9 url(splash.jpg) center/cover no-repeat;transition:opacity .4s}#splash.out{opacity:0;pointer-events:none}.nosplash #splash{display:none}</style>
 <script>
 /* Splash: tampil langsung saat halaman dibuka, hilang setelah data siap (maks. 3 detik) */
 (function(){var t0=Date.now(),done=0;
 window.hideSplash=function(){if(done)return;done=1;setTimeout(function(){var e=document.getElementById('splash');if(e){e.classList.add('out');setTimeout(function(){e.remove()},400)}},Math.max(0,700-(Date.now()-t0)))};
 setTimeout(window.hideSplash,3000);
+function showErr(m){try{if(window.hideSplash)window.hideSplash();var e=document.getElementById('main')||document.getElementById('view');if(e&&!e.getAttribute('data-err')&&(!e.firstChild||e.querySelector('.sk'))){e.setAttribute('data-err','1');e.innerHTML='<p class="empty">Terjadi kesalahan: '+String(m).replace(/</g,'&lt;')+'<br><br><button class="btn pri" onclick="location.reload()">Muat ulang</button></p>'}}catch(x){}}
+window.addEventListener('error',function(e){showErr(e.message)});
+window.addEventListener('unhandledrejection',function(e){showErr(e.reason&&e.reason.message||e.reason)});
+
 })();
 </script>
 <title>BisaPINJAM: pinjam barang dengan QR</title>
@@ -28,7 +32,7 @@ setTimeout(window.hideSplash,3000);
 *,*::before,*::after{box-sizing:inherit}
 html{height:100%;-webkit-text-size-adjust:100%}
 body{margin:0;min-height:100%;background:var(--flat);color:var(--ink);font:15px/1.5 "Plus Jakarta Sans",system-ui,sans-serif;text-align:left;-webkit-font-smoothing:antialiased;font-variant-numeric:tabular-nums}
-body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;transform:translateZ(0);background:radial-gradient(circle at 12% 8%,var(--b1),transparent 42%),radial-gradient(circle at 92% 34%,var(--b2),transparent 46%),radial-gradient(circle at 28% 96%,var(--b3),transparent 46%),var(--page)}
+body::before{content:"";position:fixed;top:0;right:0;bottom:0;left:0;z-index:-1;pointer-events:none;transform:translateZ(0);background:radial-gradient(circle at 12% 8%,var(--b1),transparent 42%),radial-gradient(circle at 92% 34%,var(--b2),transparent 46%),radial-gradient(circle at 28% 96%,var(--b3),transparent 46%),var(--page)}
 h1,h2,h3,h4,p{margin:0}
 h1,h2,h3,h4{letter-spacing:-.02em;text-wrap:balance}
 p{text-wrap:pretty}
@@ -108,7 +112,7 @@ dialog[open]::backdrop{animation:fade .3s}
 .ph{position:relative;overflow:hidden;background:var(--ph);display:grid;place-items:center}
 .ph .ico{opacity:.5;color:var(--tinttxt)}
 .ph .ico svg{width:44px;height:44px;stroke-width:1.4}
-.ph img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.ph img{position:absolute;top:0;right:0;bottom:0;left:0;width:100%;height:100%;object-fit:cover}
 .hero .ph{background:transparent;margin:10px 10px 0 0;border-radius:90px 90px 0 0}
 .sheet .ph{height:170px;border-radius:20px;margin-bottom:14px}
 .sec{display:flex;justify-content:space-between;align-items:baseline;margin:26px 0 12px}
@@ -119,7 +123,7 @@ dialog[open]::backdrop{animation:fade .3s}
 .cat span{width:60px;height:60px;border-radius:50%;display:grid;place-items:center;color:var(--tinttxt);background:var(--soft)}
 .cat span svg{width:26px;height:26px}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.pc{position:relative;content-visibility:auto;contain-intrinsic-size:auto 260px}
+.pc{position:relative}
 .pcb{display:block;width:100%;text-align:left;border:0;background:none;padding:0}
 .pcb .ph{aspect-ratio:3/4;border-radius:20px}
 .pcb h4{font-size:.9rem;font-weight:600;line-height:1.35;margin:10px 2px 2px;min-height:2.7em;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
@@ -255,13 +259,156 @@ body::before{background:radial-gradient(circle at 10% 8%,rgba(96,165,250,.45),tr
 .pact svg{width:16px;height:16px}
 .pact .addb{background:var(--grad);color:#fff;border-color:transparent;box-shadow:0 4px 10px rgba(47,124,246,.28)}
 .pact .addb:disabled{background:var(--c-done);color:var(--mute);box-shadow:none}
-.pc{contain-intrinsic-size:auto 330px}
+.fab{position:fixed;right:max(16px,calc(50% - 214px));bottom:calc(84px + env(safe-area-inset-bottom,0px));width:56px;height:56px;border-radius:50%;background:var(--grad);color:#fff;border:0;display:grid;place-items:center;box-shadow:0 8px 20px rgba(47,124,246,.4);z-index:19}
+.fab svg{width:26px;height:26px}.fab[hidden]{display:none}
+.ibtn{width:44px;height:44px}.chips button,.toggle button{min-height:42px}
+
+/* ===== Tema Orbix: krem-peach lembut, kartu putih, aksen oranye, navigasi hitam ===== */
+:root{--ink:#1c1c1e;--bg:rgba(255,255,255,.5);--sheet:#fff;--soft:#fff;--glass:#fff;--edge:rgba(0,0,0,.06);--line:rgba(0,0,0,.09);--mute:#8a8a8e;--hero:linear-gradient(135deg,#2e2e31,#161618);--dark:#f26a3d;--on-dark:#fff;--shadow:0 6px 20px rgba(60,30,10,.07);--tint:rgba(242,106,61,.12);--tinttxt:#d9531f;--ph:rgba(0,0,0,.045);--ok:#17794a;--red:#d64545;--warn:#c4491b;--page:linear-gradient(180deg,#fff7f1,#fff1e8);--flat:#fdf4ee;--c-wait:#ffe9df;--c-ok:#e4f5ec;--c-done:#efeff1;--c-no:#fde4e4;--grad:linear-gradient(135deg,#ff8a5c,#f26a3d);--pri-bg:#1b1b1d;--pri-tx:#fff;--navbg:#1b1b1d}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--ink:#f5f5f7;--bg:rgba(20,20,22,.55);--sheet:#1c1c1e;--soft:#202023;--glass:#1b1b1d;--edge:rgba(255,255,255,.08);--line:rgba(255,255,255,.1);--mute:#9a9aa0;--hero:linear-gradient(135deg,#34343a,#1a1a1d);--dark:#ff7a4d;--shadow:0 6px 20px rgba(0,0,0,.4);--tint:rgba(255,122,77,.16);--tinttxt:#ff9a73;--ph:rgba(255,255,255,.06);--ok:#4ade80;--red:#ff7b7b;--warn:#ffa27a;--page:linear-gradient(180deg,#0e0e10,#151517);--flat:#0e0e10;--c-wait:rgba(255,122,77,.18);--c-ok:rgba(74,222,128,.16);--c-done:rgba(255,255,255,.08);--c-no:rgba(255,123,123,.16);--pri-bg:#f5f5f7;--pri-tx:#111;--navbg:#2a2a2e}}
+body::before{background:radial-gradient(circle at 12% 6%,rgba(255,170,130,.55),transparent 42%),radial-gradient(circle at 90% 30%,rgba(255,120,90,.28),transparent 46%),radial-gradient(circle at 20% 92%,rgba(255,200,170,.45),transparent 46%),radial-gradient(circle at 88% 88%,rgba(255,150,120,.26),transparent 40%),var(--page)}
+@media(prefers-color-scheme:dark){body::before{background:radial-gradient(circle at 12% 6%,rgba(255,122,77,.22),transparent 42%),radial-gradient(circle at 90% 34%,rgba(255,90,60,.14),transparent 46%),var(--page)}}
+.card,.pc,.search,.ibtn{box-shadow:var(--shadow)}
+.card{border-radius:24px;border-color:transparent}
+.btn{border-radius:999px}
+.btn.pri{background:var(--pri-bg);color:var(--pri-tx);box-shadow:none}
+.chips button[aria-pressed="true"],.tabs button[aria-pressed="true"]{background:var(--pri-bg);color:var(--pri-tx);border-color:transparent}
+.st.wait{color:var(--warn)}.st.ok{color:var(--ok)}.st.no{color:var(--red)}.st.done{color:var(--mute)}
+#toast{background:#1b1b1d;color:#fff}
+#dlg,.sheet{background:#1c1c1e}
+.sheet{--ink:#f5f5f7;--mute:#a1a1a6;--soft:#2a2a2d;--edge:rgba(255,255,255,.08);--line:rgba(255,255,255,.12);--ph:rgba(255,255,255,.06);--tint:rgba(242,106,61,.2);--tinttxt:#ff9a73;--pri-bg:#f26a3d;--pri-tx:#fff;color:var(--ink)}
+.stats>div:nth-child(1) b{color:#f26a3d}.stats>div:nth-child(2) b{color:var(--ink)}.stats>div:nth-child(3) b{color:#d64545}.stats>div:nth-child(4) b{color:#17794a}
+.fab{background:var(--grad);box-shadow:0 8px 20px rgba(242,106,61,.4)}
+/* ----- halaman peminjam (Orbix) ----- */
+.word{background:none;-webkit-text-fill-color:currentColor;color:var(--ink)}
+.search{border-radius:999px;border-color:transparent}
+.flt{width:44px;height:44px;border-radius:50%;background:var(--pri-bg);color:var(--pri-tx)}
+.ibtn{border-radius:50%;border-color:transparent}
+.toggle button[aria-pressed="true"]{background:var(--pri-bg);color:var(--pri-tx)}
+.hero{border-radius:28px;box-shadow:0 14px 30px rgba(0,0,0,.18)}
+.hero::before{background:rgba(242,106,61,.38)}.hero::after{background:rgba(255,138,92,.22)}
+.dark{background:var(--grad);color:#fff}
+.sec button{color:var(--dark)}
+.cat span{border-radius:20px;background:var(--tint);color:var(--dark)}
+.cat:nth-child(5n+2) span{background:rgba(128,128,128,.14);color:var(--ink)}
+.cat:nth-child(5n+3) span{background:rgba(217,138,6,.16);color:#d98a06}
+.cat:nth-child(5n+4) span{background:rgba(224,69,123,.13);color:#e0457b}
+.cat:nth-child(5n+5) span{background:rgba(168,116,58,.16);color:#b17a3c}
+.pc{border-radius:24px;border-color:transparent}
+.pcb .ph{border-radius:18px}
+.go,.pact .addb{background:var(--grad)}
+.pact .addb{box-shadow:0 6px 14px rgba(242,106,61,.35)}
+.pact button{border-radius:999px;color:var(--ink)}
+.pact .addb{color:#fff}
+.fav[aria-pressed="true"]{color:#f26a3d}
+#fab{display:none}
+#nav{padding:0 0 calc(12px + env(safe-area-inset-bottom,0px))}
+#nav div{width:calc(100% - 28px);max-width:430px;border:0;border-radius:30px;background:var(--navbg);padding:8px;box-shadow:0 12px 30px rgba(0,0,0,.28)}
+#nav button{color:#9a9aa0}
+#nav button[aria-current="true"]{color:#fff}
+#nav button[aria-current="true"]::before{content:none}
+#nav button:nth-child(3){flex:0 0 58px;height:58px;margin:-28px 6px 0;border-radius:50%;background:#fff;color:var(--dark);border:3px solid var(--dark);box-shadow:0 8px 18px rgba(242,106,61,.4)}
+#nav button:nth-child(3) span{display:none}
+#nav button:nth-child(3)[aria-current="true"]{background:#fff;color:var(--dark)}
+#toast{bottom:calc(96px + env(safe-area-inset-bottom,0px))}
+.app{padding-bottom:116px}
+/* ===== Gaya baru: bento, squircle, tombol 3D, ikon berwarna ===== */
+.logo{width:46px;height:46px;border-radius:16px;border:2px solid var(--dark);padding:2px;background:var(--soft);object-fit:cover}
+.logo-fb{display:grid;place-items:center;background:var(--grad);color:#fff;font-weight:800;font-size:1.3rem;border:0;padding:0}
+.word{font-size:1.2rem;display:block;line-height:1.1}.hi{display:block;font-size:.74rem;color:var(--mute);font-weight:600;margin-top:2px}
+.card,.pc,.quick button,.stat3 div{border:1.5px solid var(--edge);box-shadow:0 3px 0 var(--edge)}
+.card{border-radius:20px}.pc{border-radius:20px}
+.btn,.pact button,.dark{border-radius:14px;font-weight:700}
+.btn.pri,.pact .addb,.dark{box-shadow:0 4px 0 rgba(0,0,0,.22)}
+.btn:active,.pact button:active,.dark:active,.quick button:active{transform:translateY(2px);box-shadow:0 1px 0 rgba(0,0,0,.2)}
+.chips button,.toggle button{border-radius:12px}
+.search{border-radius:16px;border:1.5px solid var(--edge);box-shadow:0 3px 0 var(--edge)}
+.flt{border-radius:12px;width:40px;height:40px}
+.ibtn{border-radius:14px;width:44px;height:44px;border:1.5px solid var(--edge);box-shadow:0 3px 0 var(--edge)}
+.hero{border-radius:24px}
+.quick{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:0 0 16px}
+.quick button{display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px 4px;border-radius:18px;background:var(--soft);font-size:.72rem;font-weight:700;color:var(--ink)}
+.quick i{width:44px;height:44px;border-radius:14px;display:grid;place-items:center}
+.quick svg{width:22px;height:22px}
+.q1{background:var(--grad);color:#fff}.q2{background:rgba(59,130,246,.14);color:#3b82f6}.q3{background:rgba(236,72,153,.14);color:#ec4899}.q4{background:rgba(20,184,166,.15);color:#0f9f90}
+.stat3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:14px 0 18px}
+.stat3 div{background:var(--soft);border-radius:18px;padding:10px 12px;display:grid;grid-template-columns:auto 1fr;gap:0 8px;align-items:center}
+.stat3 svg{width:22px;height:22px;color:var(--dark);grid-row:1/3}
+.stat3 b{font-size:1.15rem;line-height:1.1}.stat3 span{font-size:.7rem;color:var(--mute)}
+.sec h3{display:flex;align-items:center;gap:8px}.sec h3 svg{width:20px;height:20px;color:var(--dark)}
+#list{grid-template-columns:1fr;gap:12px}
+#list .pc{padding:12px}
+#list .pcb{display:grid;grid-template-columns:96px 1fr;grid-template-rows:auto 1fr;column-gap:14px;align-items:start;text-align:left}
+#list .pcb .ph{grid-row:1/3;grid-column:1;width:96px;height:96px;aspect-ratio:auto;border-radius:16px}
+#list .pcb h4{grid-column:2;margin:2px 0 4px;min-height:0;padding-right:38px}
+#list .pcb .meta{grid-column:2;margin:0}
+#list .pact{margin:10px 0 0}
+#list .fav{top:14px;right:14px}
+#nav div{background:var(--soft);border:1.5px solid var(--edge);border-radius:24px;box-shadow:0 10px 30px rgba(60,30,10,.16)}
+#nav button{color:var(--mute);border-radius:16px}
+#nav button[aria-current="true"]{background:var(--tint);color:var(--dark)}
+#nav button:nth-child(3),#nav button:nth-child(3)[aria-current="true"]{flex:0 0 60px;height:60px;margin:-24px 4px 0;border:0;border-radius:18px;background:var(--grad);color:#fff;box-shadow:0 5px 0 #c9501f,0 14px 24px rgba(242,106,61,.35)}
+
+/* ===== Gaya Yatre: header biru, lembar putih melengkung, tombol navy, nav biru ===== */
+:root{--ink:#0d2b5e;--bg:#fff;--surface:#fff;--sheet:#fff;--soft:#fff;--glass:#fff;--edge:#d5e3f7;--line:#d5e3f7;--mute:#6b7f9c;--hero:linear-gradient(135deg,#3f90f2,#1b5bc0);--hdr:linear-gradient(165deg,#4a9df3 0%,#2a74dc 55%,#1d5fc4 100%);--dark:#1f6fe0;--shadow:0 4px 14px rgba(20,70,160,.10);--tint:#e6f0fd;--tinttxt:#1f5fc4;--ph:rgba(31,111,224,.07);--ok:#13803f;--red:#d64545;--warn:#b7791f;--page:linear-gradient(180deg,#dbe9fb,#f3f8ff);--flat:#eaf2fd;--c-wait:#fff3d1;--c-ok:#dcf5e5;--c-done:#e9eef7;--c-no:#fde4e4;--grad:linear-gradient(135deg,#4a9df3,#1f63c9);--pri-bg:#0b2d6e;--pri-tx:#fff;--navbg:linear-gradient(180deg,#2a74dc,#1d5fc4)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--ink:#e8f0ff;--bg:#0c1a38;--surface:#0c1a38;--sheet:#0f2147;--soft:#11244a;--glass:#11244a;--edge:rgba(120,170,255,.22);--line:rgba(120,170,255,.22);--mute:#93a7c8;--hero:linear-gradient(135deg,#2f6fd8,#173f8f);--hdr:linear-gradient(165deg,#2a62c4 0%,#1b4aa0 55%,#143a82 100%);--dark:#5aa0f8;--shadow:0 4px 14px rgba(0,0,0,.4);--tint:rgba(90,160,255,.16);--tinttxt:#9cc4ff;--ph:rgba(255,255,255,.06);--ok:#4ade80;--red:#ff8a8a;--warn:#ffc15a;--page:linear-gradient(180deg,#091329,#0c1a38);--flat:#091329;--c-wait:rgba(255,193,90,.16);--c-ok:rgba(74,222,128,.16);--c-done:rgba(255,255,255,.08);--c-no:rgba(255,138,138,.16);--pri-bg:#2f6fd8;--navbg:linear-gradient(180deg,#1b4aa0,#143a82)}}
+body::before{background:var(--page)}
+.card,.pc,.quick button,.stat3 div,.search,.ibtn{box-shadow:none}
+.card{border:1px solid var(--edge);border-radius:14px}
+.btn{border-radius:10px}
+.btn.pri,.pact .addb,.dark{box-shadow:none}
+.btn.pri{background:var(--pri-bg);color:var(--pri-tx)}
+.chips button,.tabs button,.toggle button{border-radius:10px;border:1px solid var(--edge)}
+.chips button[aria-pressed="true"],.tabs button[aria-pressed="true"],.toggle button[aria-pressed="true"]{background:var(--pri-bg);color:var(--pri-tx);border-color:transparent}
+#toast{background:#0b2d6e;color:#fff}
+#dlg,.sheet{background:var(--sheet)}
+.sheet{--ink:#0d2b5e;--mute:#6b7f9c;--soft:#fff;--edge:#d5e3f7;--line:#d5e3f7;--ph:rgba(31,111,224,.07);--tint:#e6f0fd;--tinttxt:#1f5fc4;--pri-bg:#0b2d6e;--pri-tx:#fff;color:var(--ink)}
+@media(prefers-color-scheme:dark){.sheet{--ink:#e8f0ff;--mute:#93a7c8;--soft:#11244a;--edge:rgba(120,170,255,.22);--line:rgba(120,170,255,.22);--ph:rgba(255,255,255,.06);--tint:rgba(90,160,255,.16);--tinttxt:#9cc4ff;--pri-bg:#2f6fd8}}
+.stats>div b{color:var(--dark)}.stats>div:nth-child(3) b{color:#d64545}
+.logo{border:2px solid #fff;background:#fff;border-radius:14px}
+/* ----- halaman peminjam (Yatre) ----- */
+.app{padding:0;background:var(--surface)}
+.hd{position:relative;overflow:hidden;background:var(--hdr);color:#fff;padding:calc(16px + env(safe-area-inset-top,0px)) 18px 58px}
+.hd::after{content:"";position:absolute;left:0;right:0;bottom:34px;height:56px;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 60' preserveAspectRatio='none'%3E%3Cpath fill='white' fill-opacity='.14' d='M0 60V38h18V22h14v16h12V10h16v28h14V26h20v34h12V18h14v42h16V30h18V14h14v46h16V34h14V24h18v36h14V8h16v52h14V28h18v32h14V20h14v40h16V36h14v24z'/%3E%3C/svg%3E") bottom/100% 100% no-repeat;pointer-events:none}
+.hd>*{position:relative;z-index:1}
+.hd .word{color:#fff;-webkit-text-fill-color:#fff}.hd .hi{color:rgba(255,255,255,.82)}
+.hd h2{color:#fff}.hd .bar2{margin:0 0 14px}
+.hd .ibtn{background:rgba(255,255,255,.18);border:0;color:#fff}
+.hd .search{background:#fff;border:0;border-radius:12px;margin-bottom:0}
+.hd .search>svg{color:#1f6fe0}
+.flt{background:var(--pri-bg);color:#fff;border-radius:10px}
+.sheetc{position:relative;background:var(--surface);margin-top:-34px;border-radius:28px 28px 0 0;padding:20px 18px 130px;min-height:62vh}
+.quick button{background:var(--tint);border:1px solid var(--edge);color:var(--ink)}
+.quick i{background:#fff;color:#1f6fe0;border-radius:50%}
+.q1{background:var(--pri-bg)!important;color:#fff!important}
+.stat3 div{background:var(--tint);border:1px solid var(--edge)}
+.stat3 svg{color:var(--dark)}
+.sec h3{color:var(--ink)}.sec button{color:var(--dark)}
+.hero{border-radius:16px;box-shadow:none}
+.hero::before{background:rgba(255,255,255,.12)}.hero::after{background:rgba(255,255,255,.08)}
+.dark{background:#ffd21f;color:#0b2d6e;border-radius:10px}
+.cat span{border-radius:50%;background:var(--tint);color:var(--dark)}
+.cat:nth-child(n) span{background:var(--tint);color:var(--dark)}
+.pc{background:var(--tint);border:1px solid var(--edge);border-radius:14px}
+.go{background:var(--grad)}
+.pact button{border-radius:10px;background:#fff;color:var(--dark);border:1px solid var(--edge)}
+.pact .addb{background:var(--pri-bg);color:#fff;border-color:transparent}
+.fav{background:#fff}.fav[aria-pressed="true"]{color:#e5484d}
+#nav{padding:0}
+#nav div{width:100%;max-width:460px;border:0;border-radius:0;background:var(--navbg);padding:8px 8px calc(8px + env(safe-area-inset-bottom,0px));box-shadow:0 -4px 16px rgba(20,70,160,.18)}
+#nav button{color:rgba(255,255,255,.72);border-radius:12px}
+#nav button[aria-current="true"]{background:rgba(255,255,255,.2);color:#fff}
+#nav button:nth-child(3),#nav button:nth-child(3)[aria-current="true"]{flex:1;height:56px;margin:0;border:0;border-radius:12px;background:none;color:rgba(255,255,255,.72);box-shadow:none}
+#nav button:nth-child(3)[aria-current="true"]{background:rgba(255,255,255,.2);color:#fff}
+#nav button:nth-child(3) span{display:inline-block}
+#toast{bottom:calc(84px + env(safe-area-inset-bottom,0px))}
 </style>
 </head>
 <body>
 <div id="splash" aria-hidden="true"></div>
 <div class="app"><main id="main"></main></div>
 <nav id="nav" aria-label="Menu utama"><div></div></nav>
+<button class="fab" id="fab" data-tab="scan" aria-label="Scan QR"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h3v3h-3zM20 14v6h-6"/></svg></button>
 <dialog id="dlg"><div class="sheet" id="dlgBody"></div></dialog>
 <div id="toast" role="status" aria-live="polite"></div>
 
@@ -289,7 +436,7 @@ const FB_READY = CFG_OK && typeof firebase !== 'undefined';
 const DEMO = !CFG_OK; /* config belum diisi: data sementara di browser ini, otomatis nonaktif setelah firebaseConfig diisi */
 const FB_MSG = 'Firebase gagal dimuat. Periksa koneksi internet lalu muat ulang halaman.';
 let db = null, auth = null;
-if (FB_READY) { firebase.initializeApp(firebaseConfig); db = firebase.firestore(); auth = firebase.auth(); }
+if (FB_READY) { firebase.initializeApp(firebaseConfig); db = (function(){var d=firebase.firestore();try{d.enablePersistence({synchronizeTabs:true}).catch(function(){})}catch(e){}return d})(); auth = firebase.auth(); }
 else if (DEMO) {
   ({db, auth} = demoFirebase());
 }
@@ -348,7 +495,7 @@ function demoFirebase() {
 
 
 const q = s => document.querySelector(s);
-const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const ymd = d => new Date(d - d.getTimezoneOffset() * 6e4).toISOString().slice(0, 10); /* tanggal lokal, bukan UTC */
 const today = () => ymd(new Date());
 const addDays = n => ymd(new Date(Date.now() + n * 864e5));
@@ -381,6 +528,9 @@ const P = {
   bag: '<path d="M6 7h12l1 13H5z"/><path d="M9 7a3 3 0 0 1 6 0"/>',
   heart: '<path d="M12 21s-8-5.2-8-11a4.5 4.5 0 0 1 8-2.8A4.5 4.5 0 0 1 20 10c0 5.8-8 11-8 11z"/>',
   plus: '<path d="M12 5v14M5 12h14"/>',
+  bolt: '<path d="M13 2L4 14h7l-1 8 9-12h-7z"/>',
+  check: '<path d="M5 13l4 4L19 7"/>',
+  clock: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
   back: '<path d="M15 5l-7 7 7 7"/>',
   search: '<circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/>',
   sliders: '<path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/>',
@@ -412,28 +562,29 @@ const views = {
   home: () => {
     const hot = [...D.items].filter(i => flt === 'all' || i.stock).sort((a, b) => (b.total - b.stock) - (a.total - a.stock)).slice(0, 4);
     const n = mineActive().length;
-    return `<div class="top"><div class="brand"><img class="logo" src="icon.jpg" alt="" onerror="this.remove()"><span class="word">BisaPINJAM</span></div><div style="display:flex"><button class="ibtn" data-heart aria-label="Barang favorit">${ic('heart')}</button><button class="ibtn" data-tab="mine" aria-label="Pinjaman saya">${ic('bag')}${n ? `<span class="badge">${n}</span>` : ''}</button></div></div>
-<form class="search" id="hs">${ic('search')}<input id="hq" type="search" placeholder="Cari nama atau kode barang" aria-label="Cari barang"><button type="button" class="flt" data-tab="barang" aria-label="Lihat semua barang">${ic('sliders')}</button></form>
-<div class="toggle"><button data-flt="all" aria-pressed="${flt === 'all'}">Semua barang</button><button data-flt="ok" aria-pressed="${flt === 'ok'}">Tersedia</button></div>
+    return `<div class="hd"><div class="top"><div class="brand"><img class="logo" src="icon.jpg" alt="" onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'logo logo-fb',textContent:'B'}))"><div><span class="word">BisaPINJAM</span><span class="hi">Halo, ${esc(me || 'Peminjam')}</span></div></div><div style="display:flex"><button class="ibtn" data-heart aria-label="Barang favorit">${ic('heart')}</button><button class="ibtn" data-tab="mine" aria-label="Pinjaman saya">${ic('bag')}${n ? `<span class="badge">${n}</span>` : ''}</button></div></div>
+<form class="search" id="hs">${ic('search')}<input id="hq" type="search" placeholder="Cari nama atau kode barang" aria-label="Cari barang"><button type="button" class="flt" data-tab="barang" aria-label="Lihat semua barang">${ic('sliders')}</button></form></div>
+<div class="sheetc"><div class="quick"><button data-tab="scan"><i class="q1">${ic('qr')}</i>Scan QR</button><button data-tab="barang"><i class="q2">${ic('grid')}</i>Barang</button><button data-heart><i class="q3">${ic('heart')}</i>Favorit</button><button data-tab="mine"><i class="q4">${ic('bag')}</i>Pinjaman</button></div>
 <section class="hero"><div><span class="pill">Baru</span><h2>Pinjam alat praktik</h2><p>Scan QR di barang atau pilih dari daftar untuk mulai meminjam.</p><button class="dark" data-tab="scan">${ic('qr')}Scan sekarang</button></div>${photo('stok1.jpg', 'tag', '', 'eager')}</section>
-<div class="sec"><h3>Kategori</h3><button data-tab="barang">Lihat semua</button></div>
+<div class="stat3"><div>${ic('box')}<b>${D.items.length}</b><span>Barang</span></div><div>${ic('check')}<b>${D.items.filter(i => i.stock).length}</b><span>Tersedia</span></div><div>${ic('clock')}<b>${n}</b><span>Pinjamanku</span></div></div>
+<div class="sec"><h3>${ic('grid')}Kategori</h3><button data-tab="barang">Lihat semua</button></div>
 <div class="cats">${catList().map(([l, e, v]) => `<button class="cat" data-cat="${esc(v)}"><span>${ic(e)}</span>${l}</button>`).join('')}</div>
-<div class="sec"><h3>Sering dipinjam</h3><button data-tab="barang">Lihat semua</button></div>
+<div class="sec"><h3>${ic('bolt')}Sering dipinjam</h3><button data-tab="barang">Lihat semua</button></div>
+<div class="toggle"><button data-flt="all" aria-pressed="${flt === 'all'}">Semua barang</button><button data-flt="ok" aria-pressed="${flt === 'ok'}">Tersedia</button></div>
 <div class="grid2">${gridHtml(hot)}</div>
-<p class="foot"><a href="admin.html">Masuk admin</a></p>`;
+<p class="foot"><a href="admin.html">Masuk admin</a></p></div>`;
   },
-  barang: () => `${back('Barang')}<form class="search" id="bs">${ic('search')}<input id="search" type="search" placeholder="Cari nama atau kode barang" value="${esc(term)}" aria-label="Cari barang"></form>
-<div class="chips">${['', ...new Set(D.items.map(i => i.cat))].map(c => `<button data-cat="${esc(c)}" aria-pressed="${cat === c && !onlyFav}">${c || 'Semua'}</button>`).join('')}<button data-heart aria-pressed="${onlyFav}">Favorit</button><button data-ok aria-pressed="${okOnly}">Tersedia</button></div>
-<div class="grid2" id="list">${gridHtml(filtered())}</div>`,
-  scan: () => `${back('Scan QR')}<div class="card"><p class="note">Arahkan kamera ke label QR pada barang.</p>
+  barang: () => `<div class="hd">${back('Barang')}<form class="search" id="bs">${ic('search')}<input id="search" type="search" placeholder="Cari nama atau kode barang" value="${esc(term)}" aria-label="Cari barang"></form></div><div class="sheetc"><div class="chips">${['', ...new Set(D.items.map(i => i.cat))].map(c => `<button data-cat="${esc(c)}" aria-pressed="${cat === c && !onlyFav}">${c || 'Semua'}</button>`).join('')}<button data-heart aria-pressed="${onlyFav}">Favorit</button><button data-ok aria-pressed="${okOnly}">Tersedia</button></div>
+<div class="grid2" id="list">${gridHtml(filtered())}</div></div>`,
+  scan: () => `<div class="hd">${back('Scan QR')}</div><div class="sheetc"><div class="card"><p class="note">Arahkan kamera ke label QR pada barang.</p>
 <div class="row"><button class="btn pri" id="cam">${ic('qr')}Nyalakan kamera</button></div><div id="reader"></div>
 <form id="manual"><label>Atau ketik kode barang<input id="kode" placeholder="Contoh: BRG-001" required></label>
 <div class="row"><button class="btn">Cari barang</button></div></form>
-${D.items.length ? `<p class="small note">Kode contoh: ${D.items.slice(0, 3).map(i => `<a href="#" data-fill="${esc(i.id)}">${esc(i.id)}</a>`).join(', ')}</p>` : ''}</div>`,
+${D.items.length ? `<p class="small note">Kode contoh: ${D.items.slice(0, 3).map(i => `<a href="#" data-fill="${esc(i.id)}">${esc(i.id)}</a>`).join(', ')}</p>` : ''}</div></div>`,
   mine: () => {
     const act = l => ['diajukan', 'disetujui', 'dipinjam'].includes(l.status);
     const m = [...D.loans].reverse().filter(l => act(l) !== hist);
-    return `${back('Pinjaman saya')}<div class="chips"><button data-hist="0" aria-pressed="${!hist}">Aktif</button><button data-hist="1" aria-pressed="${hist}">Riwayat</button></div>${m.length ? m.map(loanCard).join('') : `<p class="empty">${hist ? 'Belum ada riwayat pinjaman.' : 'Tidak ada pinjaman aktif. Pilih barang di beranda lalu ajukan peminjaman.'}</p>`}`;
+    return `<div class="hd">${back('Pinjaman saya')}</div><div class="sheetc"><div class="chips"><button data-hist="0" aria-pressed="${!hist}">Aktif</button><button data-hist="1" aria-pressed="${hist}">Riwayat</button></div>${m.length ? m.map(loanCard).join('') : `<p class="empty">${hist ? 'Belum ada riwayat pinjaman.' : 'Tidak ada pinjaman aktif. Pilih barang di beranda lalu ajukan peminjaman.'}</p>`}</div>`;
   }
 };
 
@@ -443,6 +594,7 @@ const stopScan = () => { if (scanner) { const s = scanner; scanner = null; s.sto
 const render = keep => {
   stopScan();
   q('#main').innerHTML = ready ? views[tab]() : SKEL;
+  const fb = q('#fab'); if (fb) fb.hidden = tab === 'scan';
   const nav = q('#nav div');
   if (!nav.children.length) nav.innerHTML = [['home','Beranda','home'], ['barang','Barang','grid'], ['scan','Scan QR','qr'], ['mine','Pinjaman saya','bag']]
     .map(([k, l, i]) => `<button data-tab="${k}" aria-label="${l}" aria-current="${k === tab}">${ic(i)}<span>${l.split(' ')[0]}</span></button>`).join('');
@@ -562,6 +714,7 @@ const rerender = () => {
   const s = JSON.stringify([D.items, D.loans]); if (s === sig) return; sig = s;
   cancelAnimationFrame(rq); rq = requestAnimationFrame(() => render(true));
 };
+setTimeout(() => { if (!ready && tab !== 'scan') { hideSplash(); q('#main').innerHTML = '<p class="empty">Data belum termuat. Periksa koneksi internet.<br><br><button class="btn pri" onclick="location.reload()">Coba lagi</button></p>'; } }, 10000);
 let deep = new URLSearchParams(location.search).get('i') || '';
 if (!db) q('#main').innerHTML = `<p class="empty">${FB_MSG}</p>`;
 else {
