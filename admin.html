@@ -758,6 +758,116 @@ if (db) auth.onAuthStateChanged(async u => {
 });
 render();
 </script>
+<script>
+/* social.js: rating bintang, like, komentar + balasan admin, urutkan produk. Dipakai index.html DAN admin.html */
+(()=>{
+const A=!!q('#tabs');let LK=[],RV=[],uid=null,un=[],srt='pop',prev=null,rf=0;
+const SV=(p,c='')=>`<svg class="${c}" viewBox="0 0 24 24">${p}</svg>`;
+const ST='<path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z"/>',HT='<path d="M12 21s-8-5.2-8-11a4.5 4.5 0 0 1 8-2.8A4.5 4.5 0 0 1 20 10c0 5.8-8 11-8 11z"/>',CM='<path d="M21 12a8 8 0 0 1-11.6 7.1L3 20l1.1-4.9A8 8 0 1 1 21 12z"/>';
+const stars=v=>'<span class="sxs">'+[1,2,3,4,5].map(k=>SV(ST,v>=k-.5?'sx on':'sx')).join('')+'</span>';
+const st=id=>{const r=RV.filter(x=>x.item===id&&x.rating),n=r.length;return{n,avg:n?r.reduce((a,x)=>a+x.rating,0)/n:0,lk:LK.filter(x=>x.item===id).length,me:LK.some(x=>x.item===id&&x.uid===uid),c:RV.filter(x=>x.item===id&&x.text).length}};
+const line=s=>`${stars(s.avg)}<b>${s.n?s.avg.toFixed(1):'–'}</b><span>(${s.n})</span><i>·</i>${SV(HT,'sxi')}${s.lk}<i>·</i>${SV(CM,'sxi')}${s.c}`;
+const S={pop:i=>{const s=st(i.id);return s.lk*2+s.n+s.avg},rate:i=>{const s=st(i.id);return s.avg*100+s.n},new:i=>i.ts||0,loan:i=>i.total-i.stock};
+const SL={pop:'Terpopuler',rate:'Rating tertinggi',new:'Terbaru',loan:'Sering dipinjam'};
+const css=document.createElement('style');css.textContent=`
+.sxl{display:flex;align-items:center;flex-wrap:wrap;gap:4px;font-size:.72rem;color:var(--mute);margin-top:3px}.sxl b{color:var(--ink)}.sxl i{font-style:normal;opacity:.5}
+.sxs{display:inline-flex;gap:1px}.sx{width:14px;height:14px;stroke:#e2a400;stroke-width:1.6;fill:none}.sx.on{fill:#ffd21f}.sxi{width:13px;height:13px;display:inline-block;vertical-align:-2px;margin-right:2px}
+.sxnew{font-style:normal;font-weight:700;background:#ffd21f;color:#0b2d6e;border-radius:999px;padding:1px 8px;margin-left:4px}
+.sxsort{margin:0 0 12px}.sxbar{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:12px 0}.sxsum{display:flex;align-items:center;gap:6px}.sxsum .sx{width:20px;height:20px}
+.sxlike{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--edge);background:var(--soft);color:var(--mute);border-radius:999px;padding:8px 16px;font-weight:700}.sxlike[aria-pressed="true"]{color:#e5484d;border-color:#e5484d}.sxlike[aria-pressed="true"] svg{fill:currentColor}
+.sxh{margin:20px 0 8px}.sxpick{display:flex;gap:4px;margin:6px 0}.sxpick button{border:0;background:none;padding:2px}.sxpick .sx{width:34px;height:34px}
+.sxf textarea{width:100%;min-height:80px;padding:12px 14px;border:1px solid var(--edge);border-radius:12px;background:var(--soft);color:var(--ink);font:inherit;resize:vertical}.sxf input{width:100%;margin-bottom:8px;padding:12px 14px;border:1px solid var(--edge);border-radius:12px;background:var(--soft);color:var(--ink)}
+.sxr{padding:12px 0;border-bottom:1px solid var(--edge)}.sxr p{margin-top:4px;font-size:.9rem}.sxr .pdtx{font-size:.7rem;color:var(--mute)}.sxrep{margin-top:8px;padding:8px 12px;border-radius:12px;background:var(--tint)}.sxrep b{font-size:.78rem}`;
+document.head.appendChild(css);
+const ensure=async()=>auth.currentUser||(await auth.signInAnonymously()).user;
+const key=el=>{const o=el.querySelector('[data-open]'),i=o&&item(o.dataset.open);return i?S[srt](i):0};
+function enh(){
+ if(A){document.querySelectorAll('#view .card').forEach(c=>{const b=c.querySelector('[data-qrshow]');if(!b)return;let p=c.querySelector('.sxl');if(!p){p=document.createElement('div');p.className='sxl';c.querySelector('.row').before(p)}p.innerHTML=line(st(b.dataset.qrshow))});return}
+ document.querySelectorAll('.pc').forEach(pc=>{const o=pc.querySelector('.pcb[data-open]');if(!o)return;const id=o.dataset.open,i=item(id),s=st(id);let p=pc.querySelector('.sxl');if(!p){p=document.createElement('div');p.className='sxl';pc.querySelector('.meta').appendChild(p)}p.innerHTML=line(s)+(i&&i.ts&&Date.now()-i.ts<6048e5?'<em class="sxnew">Baru</em>':'');const f=pc.querySelector('.fav');if(f)f.setAttribute('aria-pressed',s.me)});
+ const l=q('#list');if(l){const a=[...l.children].filter(x=>x.classList.contains('pc')),b=a.slice().sort((x,y)=>key(y)-key(x));if(b.some((x,k)=>x!==a[k]))b.forEach(x=>l.appendChild(x))}
+}
+const rev=x=>`<div class="sxr"><div class="t"><b>${esc(x.who||'Peminjam')}${x.uid===uid?' <small>(kamu)</small>':''}</b>${stars(x.rating)}</div><p class="pdtx">${fts(x.ts,true)}</p>${x.text?`<p>${esc(x.text)}</p>`:''}${x.reply?`<div class="sxrep"><b>Admin${VB}</b><p>${esc(x.reply)}</p></div>`:''}</div>`;
+const sum=s=>`${stars(s.avg)}<b>${s.n?s.avg.toFixed(1):'–'}</b><span class="note">(${s.n} rating)</span>`;
+const lst=id=>RV.filter(x=>x.item===id).sort((a,b)=>b.ts-a.ts).map(rev).join('')||'<p class="empty">Belum ada ulasan. Jadilah yang pertama!</p>';
+function refresh(){const f=q('#sxf');if(!f)return;const id=f.dataset.id,s=st(id);q('.sxsum').innerHTML=sum(s);const b=q('.sxlike');b.setAttribute('aria-pressed',s.me);b.querySelector('span').textContent=s.lk;q('.sxh').textContent='Ulasan ('+RV.filter(x=>x.item===id).length+')';q('.sxlist').innerHTML=lst(id)}
+function detail(id){
+ const i=item(id);if(!i)return;const s=st(id),my=RV.find(x=>x.item===id&&x.uid===uid);
+ q('#dlgBody').innerHTML=`${photo(i.img,EMO[i.cat]||'box',i.name)}<div class="t"><h2>${esc(i.name)}</h2><span class="st ${i.stock?'ok':'no'}">${i.stock?i.stock+' tersedia':'Habis'}</span></div><p class="note">${esc(i.loc)} · ${esc(i.cat)} · kondisi ${esc(i.cond.toLowerCase())}</p>
+<div class="sxbar"><div class="sxsum">${sum(s)}</div><button class="sxlike" data-sx-like="${esc(id)}" aria-pressed="${s.me}">${SV(HT)}<span>${s.lk}</span></button></div>
+<div class="row"><button class="btn" data-close>Tutup</button><button class="btn pri" data-sx-borrow="${esc(id)}" ${i.stock?'':'disabled'}>Pinjam barang</button></div>
+<h3 class="sxh">Ulasan (${RV.filter(x=>x.item===id).length})</h3>
+<form class="sxf" id="sxf" data-id="${esc(id)}"><div class="sxpick" data-v="${my?my.rating:0}">${[1,2,3,4,5].map(k=>`<button type="button" data-sx-star="${k}" aria-label="${k} bintang">${SV(ST,my&&my.rating>=k?'sx on':'sx')}</button>`).join('')}</div>
+${me?'':'<input name="who" required maxlength="40" placeholder="Nama kamu">'}<textarea name="text" maxlength="300" placeholder="Tulis komentar (opsional)">${esc(my?my.text:'')}</textarea>
+<div class="row"><button class="btn pri">${my?'Perbarui ulasan':'Kirim ulasan'}</button>${my?`<button type="button" class="btn bad" data-sx-del="${esc(id)}">Hapus</button>`:''}</div></form>
+<div class="sxlist">${lst(id)}</div>`;
+ q('#dlg').showModal();if(document.activeElement)document.activeElement.blur();
+}
+async function like(id){try{const u=await ensure(),r=db.collection('likes').doc(id+'_'+u.uid);await(LK.some(x=>x.item===id&&x.uid===u.uid)?r.delete():r.set({item:id,uid:u.uid,ts:Date.now()}))}catch(e){dbErr(e)}}
+if(!A){
+ const oh=views.home,ob=views.barang;
+ const bar=()=>`<div class="chips sxsort">${Object.entries(SL).map(([k,l])=>`<button data-sx-sort="${k}" aria-pressed="${srt===k}">${l}</button>`).join('')}</div>`;
+ views.home=()=>{const h=oh().replace('Sering dipinjam','Produk pilihan'),a=h.indexOf('<div class="grid2">'),b=h.indexOf('<button class="more"');if(a<0||b<0)return h;const l=D.items.filter(i=>flt==='all'||i.stock).sort((x,y)=>S[srt](y)-S[srt](x)).slice(0,6);return h.slice(0,a)+bar()+'<div class="grid2">'+gridHtml(l)+'</div>'+h.slice(b)};
+ views.barang=()=>{const h=ob(),a=h.indexOf('<div class="grid2" id="list">');return a<0?h:h.slice(0,a)+bar()+h.slice(a)};
+}else{
+ views.ulasan=()=>RV.length?'<div class="grid">'+[...RV].sort((a,b)=>b.ts-a.ts).map(x=>`<article class="card" data-r="${esc(x.item+'_'+x.uid)}"><div class="t"><span class="code">${esc((item(x.item)||{}).name||x.item)}</span>${stars(x.rating)}</div><p class="note">${esc(x.who)} · ${fts(x.ts,true)}</p>${x.text?`<p class="small">${esc(x.text)}</p>`:''}<div class="row"><input class="aq" maxlength="200" placeholder="Balas komentar…" value="${esc(x.reply||'')}"><button class="btn pri" data-sx-reply>Balas</button><button class="btn bad" data-sx-rdel>Hapus</button></div></article>`).join('')+'</div>':'<p class="empty">Belum ada ulasan dari peminjam.</p>';
+ const R=render;render=function(){R();const t=q('#tabs');if(!t||!t.children.length)return;const n=RV.filter(x=>!x.reply).length,b=document.createElement('button');b.dataset.tab='ulasan';b.setAttribute('aria-pressed',tab==='ulasan');b.innerHTML=SV(CM)+'<span>Ulasan'+(n?' ('+n+')':'')+'</span>';t.insertBefore(b,t.lastElementChild);enh()};
+}
+document.addEventListener('click',e=>{
+ const t=e.target.closest('button');if(!t)return;const d=t.dataset,hit=()=>{e.stopImmediatePropagation();e.preventDefault()};
+ if(d.sxSort){hit();srt=d.sxSort;render(true)}
+ else if(d.sxLike){hit();like(d.sxLike)}
+ else if(d.sxStar){hit();const p=t.parentElement;p.dataset.v=d.sxStar;p.querySelectorAll('.sx').forEach((s,k)=>s.classList.toggle('on',k<+d.sxStar))}
+ else if(d.sxBorrow){hit();closeDlg();borrow(d.sxBorrow)}
+ else if(d.sxDel){hit();db.collection('reviews').doc(d.sxDel+'_'+uid).delete().then(()=>{toast('Ulasan dihapus');detail(d.sxDel)}).catch(dbErr)}
+ else if(d.sxReply!==undefined){hit();const c=t.closest('[data-r]');db.collection('reviews').doc(c.dataset.r).update({reply:c.querySelector('input').value.trim(),replyTs:Date.now()}).then(()=>toast('Balasan tersimpan')).catch(dbErr)}
+ else if(d.sxRdel!==undefined){hit();if(confirm('Hapus ulasan ini?'))db.collection('reviews').doc(t.closest('[data-r]').dataset.r).delete().then(()=>toast('Ulasan dihapus')).catch(dbErr)}
+ else if(!A&&d.fav){hit();like(d.fav)}
+ else if(!A&&d.open&&t.classList.contains('pcb')){hit();detail(d.open)}
+},true);
+document.addEventListener('submit',async e=>{
+ const f=e.target;if(f.id!=='sxf')return;e.preventDefault();e.stopImmediatePropagation();
+ const id=f.dataset.id,r=+f.querySelector('.sxpick').dataset.v;if(!r)return toast('Pilih bintang dulu');
+ const nm=f.elements.who?f.elements.who.value.trim():me;
+ try{const u=await ensure();if(nm&&nm!==me){me=nm;try{localStorage.setItem('pp-me',me)}catch(x){}}
+  await db.collection('reviews').doc(id+'_'+u.uid).set({item:id,uid:u.uid,who:me||nm||'Peminjam',rating:r,text:f.elements.text.value.trim(),ts:Date.now()},{merge:true});toast('Ulasan terkirim, terima kasih!')}catch(x){dbErr(x)}
+},true);
+function onData(){
+ if(!A){favs.clear();LK.filter(x=>x.uid===uid).forEach(x=>favs.add(x.item));const mine=RV.filter(x=>x.uid===uid),n=Object.fromEntries(mine.map(x=>[x.item,x.reply||'']));if(prev&&mine.some(x=>x.reply&&prev[x.item]!==x.reply))toast('Admin membalas ulasanmu');prev=n}
+ cancelAnimationFrame(rf);rf=requestAnimationFrame(()=>{const a=document.activeElement,ty=a&&/INPUT|TEXTAREA/.test(a.tagName);
+  if(A){if(admin&&ready&&!ty)render()}else if(ready&&!ty&&(tab==='home'||tab==='barang'))render(true);enh();refresh()});
+}
+auth.onAuthStateChanged(u=>{uid=u?u.uid:null;un.forEach(f=>f());un=[];LK=[];RV=[];if(!u||(A&&u.isAnonymous))return;
+ un=[db.collection('likes').onSnapshot(s=>{LK=s.docs.map(d=>d.data());onData()},dbErr),db.collection('reviews').onSnapshot(s=>{RV=s.docs.map(d=>d.data());onData()},dbErr)]});
+const root=q(A?'#view':'#main'),mo=new MutationObserver(()=>{mo.disconnect();enh();mo.observe(root,{childList:true,subtree:true})});mo.observe(root,{childList:true,subtree:true});
+})();
+
+</script>
+<script>
+/* Ikon aplikasi: diubah admin lewat galeri, disimpan di Firestore (settings/app), tampil di index & admin */
+(()=>{
+const A=!!q('#tabs');let ic=null,nw='';try{ic=localStorage.getItem('pp-icon')}catch(e){}
+const links=u=>document.querySelectorAll('link[rel=icon],link[rel=apple-touch-icon]').forEach(l=>{l.href=u});
+const apply=u=>{document.querySelectorAll('.logo').forEach(e=>{if(e.tagName==='IMG'){if(e.getAttribute('src')!==u)e.src=u}else{const i=document.createElement('img');i.className='logo';i.alt='';i.src=u;e.replaceWith(i)}});links(u)};
+if(ic)apply(ic);
+db.collection('settings').doc('app').onSnapshot(s=>{ic=s.exists?(s.data().icon||''):'';try{localStorage.setItem('pp-icon',ic)}catch(e){}
+ if(ic)apply(ic);else{document.querySelectorAll('img.logo').forEach(e=>e.setAttribute('src','icon.jpg'));links('icon.jpg')}},()=>{});
+new MutationObserver(()=>{if(ic)apply(ic)}).observe(document.body,{childList:true,subtree:true});
+if(!A)return;
+const sq=f=>new Promise((ok,no)=>{const u=URL.createObjectURL(f),im=new Image();im.onload=()=>{const s=Math.min(im.naturalWidth,im.naturalHeight),c=document.createElement('canvas');c.width=c.height=256;c.getContext('2d').drawImage(im,(im.naturalWidth-s)/2,(im.naturalHeight-s)/2,s,s,0,0,256,256);URL.revokeObjectURL(u);ok(c.toDataURL('image/jpeg',.8))};im.onerror=()=>no(new Error('Foto tidak bisa dibaca'));im.src=u});
+const pv=u=>{const p=q('#icp');if(p)p.innerHTML=u?`<img src="${esc(u)}" alt="">`:'Ikon bawaan'};
+function open_(){nw='';q('#dlgBody').innerHTML=`<h2>Ikon aplikasi</h2><p class="note">Foto di pojok atas halaman. Pilih dari galeri, otomatis dipotong persegi.</p><div class="fprev" id="icp" style="height:140px;width:140px;margin:14px auto"></div><input type="file" id="icf" accept="image/*" hidden><div class="row"><button type="button" class="btn" data-sx-ipick>Pilih foto</button><button type="button" class="btn bad" data-sx-ireset>Ikon bawaan</button></div><div class="row"><button type="button" class="btn" data-close>Batal</button><button type="button" class="btn pri" data-sx-isave>Simpan</button></div>`;q('#dlg').showModal();pv(ic)}
+const save=(v,m)=>db.collection('settings').doc('app').set({icon:v}).then(()=>{closeDlg();toast(m)}).catch(dbErr);
+const ov=views.stok;views.stok=()=>ov().replace('<div class="row flush"><button class="btn pri" data-act="baru">','<div class="row flush"><button class="btn" data-sx-icon>Ubah ikon</button><button class="btn pri" data-act="baru">');
+document.addEventListener('click',e=>{const t=e.target.closest('button,.logo');if(!t)return;const d=t.dataset||{},h=()=>{e.stopImmediatePropagation();e.preventDefault()};
+ if(t.classList.contains('logo')){if(admin){h();open_()}}
+ else if(d.sxIcon!==undefined){h();open_()}
+ else if(d.sxIpick!==undefined){h();q('#icf').click()}
+ else if(d.sxIreset!==undefined){h();nw='';save('','Ikon dikembalikan ke bawaan')}
+ else if(d.sxIsave!==undefined){h();if(!nw)return toast('Pilih foto dulu');save(nw,'Ikon diperbarui')}
+},true);
+document.addEventListener('change',async e=>{if(e.target.id!=='icf'||!e.target.files[0])return;try{nw=await sq(e.target.files[0]);pv(nw)}catch(x){toast(x.message)}e.target.value=''});
+})();
+</script>
 <script>if ('serviceWorker' in navigator && /^https?:/.test(location.protocol)) addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));</script>
 </body>
 </html>
