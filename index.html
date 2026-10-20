@@ -331,6 +331,10 @@ body.printing #toast{display:none!important}
 .pwa-t b{font-size:.88rem}.pwa-t span{font-size:.76rem;color:#6b7f9c}
 .pwab{border:0;border-radius:10px;background:#1f63c9;color:#fff;font-weight:700;padding:9px 14px;flex:none}
 .pwa-x{border:0;background:none;color:#6b7f9c;font-size:1.4rem;line-height:1;padding:4px 6px;flex:none}
+
+/* ===== waktu posting & jam langsung ===== */
+.pdt{font-size:.7rem;color:var(--mute);margin:1px 0 0}
+.clk{text-align:center;color:rgba(255,255,255,.82);font-size:.74rem;font-weight:600;margin:-6px 0 12px}
 </style>
 </head>
 <body>
@@ -384,6 +388,15 @@ const qrUrl = id => location.origin + location.pathname.replace(/[^/]*$/, '') + 
 const byName = a => a.sort((x, y) => String(x.name).localeCompare(String(y.name)));
 const rid = () => { const A = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789', r = crypto.getRandomValues(new Uint8Array(6)); return 'BRG-' + Array.from(r, x => A[x % A.length]).join(''); };
 const loadScript = (url, ok) => ok() ? Promise.resolve() : new Promise((res, rej) => { const el = document.createElement('script'); el.src = url; el.onload = res; el.onerror = () => rej(new Error('Gagal memuat pustaka')); document.head.appendChild(el); });
+const tzName = d => { const o = -d.getTimezoneOffset() / 60; return o === 7 ? 'WIB' : o === 8 ? 'WITA' : o === 9 ? 'WIT' : 'GMT' + (o >= 0 ? '+' : '') + o; };
+/* waktu lengkap: hari, tanggal, jam, menit, detik + zona waktu */
+const fts = (ts, short) => {
+  const d = new Date(ts); if (isNaN(d)) return '-';
+  const p = n => String(n).padStart(2, '0'), day = d.toLocaleDateString('id-ID', short ? {weekday: 'short', day: 'numeric', month: 'short', year: 'numeric'} : {weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'});
+  return day + (short ? ' · ' : ' pukul ') + p(d.getHours()) + '.' + p(d.getMinutes()) + '.' + p(d.getSeconds()) + ' ' + tzName(d);
+};
+const tick = () => { const c = q('#clk'); if (c) c.textContent = fts(Date.now(), true); };
+tick(); setInterval(tick, 1000);
 const strukOk = ['diajukan', 'disetujui', 'dipinjam', 'selesai'];
 const strukTitle = {diajukan: ['Pengajuan Terkirim', 'wait'], disetujui: ['Peminjaman Disetujui', 'ok'], dipinjam: ['Barang Sedang Dipinjam', 'ok'], selesai: ['Peminjaman Selesai', 'ok']};
 const fdt = d => d ? new Date(d + 'T00:00').toLocaleDateString('id-ID', {day: 'numeric', month: 'long', year: 'numeric'}) : '-';
@@ -398,10 +411,10 @@ function strukHtml(l) {
 <div class="sk-brand"><span>BisaPINJAM${VB}</span><small>Bukti Peminjaman Barang</small></div>
 <div class="sk-code">${esc(l.id)}</div>${ver ? `<p class="sk-ver">${VB}Terverifikasi oleh admin</p>` : ''}<hr>
 ${row('Barang', i.name)}${row('Jumlah', l.qty + ' unit')}${row('Peminjam', l.who)}${row('Kelas', l.kelas)}${row('Tujuan', l.purpose)}${row('Alamat', l.addr)}<hr>
-${row('Tgl pinjam', fdt(l.date))}${row('Rencana kembali', fdt(l.due))}${l.ret ? row('Dikembalikan', fdt(l.ret.date)) + row('Kondisi', l.ret.cond) : ''}${row('Catatan', l.note)}<hr>
+${row('Diajukan', l.ts ? fts(l.ts) : '')}${row('Tgl pinjam', fdt(l.date))}${row('Rencana kembali', fdt(l.due))}${l.ret ? row('Dikembalikan', fdt(l.ret.date)) + row('Kondisi', l.ret.cond) : ''}${row('Catatan', l.note)}<hr>
 ${sig ? `<div class="sk-sig"><img src="${esc(l.sig)}" alt="Tanda tangan peminjam"><span>${esc(l.who)}</span><small>Tanda tangan peminjam</small></div>` : ''}
 <div class="sk-qr" id="skQr"></div><p class="sk-note">Tunjukkan struk ini saat mengambil dan mengembalikan barang.</p>
-<p class="sk-foot">Dicetak ${new Date().toLocaleString('id-ID', {dateStyle: 'medium', timeStyle: 'short'})}</p></div>${zig(false)}</div></div>`;
+<p class="sk-foot">Dicetak ${fts(Date.now())}</p></div>${zig(false)}</div></div>`;
 }
 function showStruk(id) {
   const l = D.loans.find(x => x.id === id); if (!l) return;
@@ -445,7 +458,7 @@ const loanInfo = l => {
   const i = item(l.item) || {name: l.item}, [s, c] = STAT[l.status], late = l.status === 'dipinjam' && l.due < today();
   return `<div class="t"><span class="code">${esc(l.id)}</span><span class="st ${c}">${s}${['disetujui', 'dipinjam', 'selesai'].includes(l.status) ? VB : ''}</span></div>
 <h3>${esc(i.name)} × ${l.qty}</h3><p class="note">${esc(l.who)}${l.kelas ? ' (' + esc(l.kelas) + ')' : ''}, untuk ${esc(l.purpose)}</p>
-<p class="small">Pinjam ${fmt(l.date)}, kembali ${fmt(l.due)}${l.ret ? `, dikembalikan ${fmt(l.ret.date)} (${esc(l.ret.cond.toLowerCase())})` : ''}${late ? ' <b class="late">Terlambat</b>' : ''}</p>${l.addr ? `<p class="small note">Alamat: ${esc(l.addr)}</p>` : ''}${l.note ? `<p class="small note">Catatan admin: ${esc(l.note)}</p>` : ''}`;
+<p class="small">Pinjam ${fmt(l.date)}, kembali ${fmt(l.due)}${l.ret ? `, dikembalikan ${fmt(l.ret.date)} (${esc(l.ret.cond.toLowerCase())})` : ''}${late ? ' <b class="late">Terlambat</b>' : ''}</p>${l.ts ? `<p class="small note">Diajukan: ${fts(l.ts)}</p>` : ''}${l.addr ? `<p class="small note">Alamat: ${esc(l.addr)}</p>` : ''}${l.note ? `<p class="small note">Catatan admin: ${esc(l.note)}</p>` : ''}`;
 };
 
 </script>
@@ -498,7 +511,7 @@ async function pwaInstall() {
 const photo = (src, emo, alt, cls = '') => `<div class="ph ${cls}"><span class="ico">${ic(emo)}</span>${src ? `<img src="${esc(src)}" alt="${esc(alt)}" loading="${cls.includes('eager') ? 'eager' : 'lazy'}" decoding="async" onerror="this.remove()">` : ''}</div>`;
 const card = i => `<article class="pc"><button class="fav" data-fav="${esc(i.id)}" aria-pressed="${favs.has(i.id)}" aria-label="Tandai ${esc(i.name)} sebagai favorit">${ic('heart')}</button>
 <button class="pcb" data-open="${esc(i.id)}">${photo(i.img, EMO[i.cat] || 'box', i.name)}${i.stock ? `<span class="nb">${i.stock}</span>` : ''}<h4>${esc(i.name)}</h4>
-<div class="meta"><p class="av ${i.stock ? '' : 'none'}">${i.stock ? i.stock + ' tersedia' : 'Stok habis'}</p></div></button><div class="pact"><button type="button" data-qrshow="${esc(i.id)}" aria-label="Lihat QR ${esc(i.name)}">${ic('qr')}QR</button><button type="button" class="addb" data-open="${esc(i.id)}" ${i.stock ? '' : 'disabled'}>${ic('plus')}Tambah</button></div></article>`;
+<div class="meta"><p class="av ${i.stock ? '' : 'none'}">${i.stock ? i.stock + ' tersedia' : 'Stok habis'}</p>${i.ts ? `<p class="pdt">Diposting ${fts(i.ts, true)}</p>` : ''}</div></button><div class="pact"><button type="button" data-qrshow="${esc(i.id)}" aria-label="Lihat QR ${esc(i.name)}">${ic('qr')}QR</button><button type="button" class="addb" data-open="${esc(i.id)}" ${i.stock ? '' : 'disabled'}>${ic('plus')}Tambah</button></div></article>`;
 const mineActive = () => D.loans.filter(l => ['diajukan', 'disetujui', 'dipinjam'].includes(l.status));
 const filtered = () => D.items.filter(i => (i.name + i.cat + i.id).toLowerCase().includes(term.toLowerCase()) && (!cat || i.cat === cat) && (!onlyFav || favs.has(i.id)) && (!okOnly || i.stock));
 const gridHtml = l => l.length ? l.map(card).join('') : `<p class="empty">${!D.items.length ? 'Belum ada barang. Admin belum menambahkan stok.' : onlyFav ? 'Belum ada favorit. Ketuk ikon hati pada barang.' : 'Tidak ada barang yang cocok. Coba kata kunci atau kategori lain.'}</p>`;
@@ -511,7 +524,7 @@ const views = {
   home: () => {
     const hot = [...D.items].filter(i => flt === 'all' || i.stock).sort((a, b) => (b.total - b.stock) - (a.total - a.stock)).slice(0, 4);
     const n = mineActive().length;
-    return `<div class="hd"><div class="top"><img class="logo" src="icon.jpg" alt="" onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'logo logo-fb',textContent:'B'}))"><div class="ttl"><span class="word">BisaPINJAM${VB}</span><span class="hi">Halo, ${esc(me || 'Peminjam')}</span></div><div style="display:flex"><button class="ibtn" data-heart aria-label="Barang favorit">${ic('heart')}</button><button class="ibtn" data-tab="mine" aria-label="Pinjaman saya">${ic('bag')}${n ? `<span class="badge">${n}</span>` : ''}</button></div></div>
+    return `<div class="hd"><div class="top"><img class="logo" src="icon.jpg" alt="" onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'logo logo-fb',textContent:'B'}))"><div class="ttl"><span class="word">BisaPINJAM${VB}</span><span class="hi">Halo, ${esc(me || 'Peminjam')}</span><span class="hi" id="clk"></span></div><div style="display:flex"><button class="ibtn" data-heart aria-label="Barang favorit">${ic('heart')}</button><button class="ibtn" data-tab="mine" aria-label="Pinjaman saya">${ic('bag')}${n ? `<span class="badge">${n}</span>` : ''}</button></div></div>
 ${seg()}
 <form class="search" id="hs">${ic('search')}<input id="hq" type="search" placeholder="Cari nama atau kode barang" aria-label="Cari barang"><button type="button" class="flt" data-tab="barang" aria-label="Lihat semua barang">${ic('sliders')}</button></form></div>
 <div class="sheetc">${pwaBanner()}<div class="quick"><button data-tab="scan"><i class="q1">${ic('qr')}</i>Scan QR</button><button data-tab="barang"><i class="q2">${ic('grid')}</i>Barang</button><button data-heart><i class="q3">${ic('heart')}</i>Favorit</button><button data-tab="mine"><i class="q4">${ic('bag')}</i>Pinjaman</button></div>
@@ -545,6 +558,7 @@ const render = keep => {
   stopScan();
   q('#main').innerHTML = ready ? views[tab]() : SKEL;
   const fb = q('#fab'); if (fb) fb.hidden = tab === 'scan';
+  tick();
   if (!keep) { scrollTo(0, 0); const m = q('#main'); m.classList.remove('in'); void m.offsetWidth; m.classList.add('in'); }
 };
 const go = t => {
@@ -569,7 +583,7 @@ function borrow(raw) {
   const i = item(codeOf(raw));
   if (!i) return toast('Kode barang tidak terdaftar');
   if (!i.stock) return toast(i.name + ' sedang habis');
-  q('#dlgBody').innerHTML = `${photo(i.img, EMO[i.cat] || 'box', i.name)}<div class="t"><h2>${esc(i.name)}</h2><span class="st ok">${i.stock} tersedia</span></div><p class="note">${esc(i.loc)} · kondisi ${esc(i.cond.toLowerCase())}</p>
+  q('#dlgBody').innerHTML = `${photo(i.img, EMO[i.cat] || 'box', i.name)}<div class="t"><h2>${esc(i.name)}</h2><span class="st ok">${i.stock} tersedia</span></div><p class="note">${esc(i.loc)} · kondisi ${esc(i.cond.toLowerCase())}</p>${i.ts ? `<p class="small note">Diposting: ${fts(i.ts)}</p>` : ''}
 <form id="bf" data-id="${esc(i.id)}"><label>Nama peminjam<input name="who" required autocomplete="name" value="${esc(me)}"></label>
 <label>Kelas<input name="kelas" required value="${esc(kelas)}" placeholder="Contoh: XI TKJ 1"></label>
 <label>Alamat lengkap<input name="addr" required autocomplete="street-address" value="${esc(addr)}" placeholder="Contoh: Jl. Sudirman No. 10, Pekanbaru"></label>
