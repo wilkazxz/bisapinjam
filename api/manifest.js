@@ -17,7 +17,7 @@ module.exports = async (req, res) => {
     if (s.iconM) icons.push({ src: '/api/icon?k=m&v=' + v, sizes: '512x512', type: 'image/jpeg', purpose: 'maskable' });
   }
   const m = {
-    name: 'BisaPINJAM', short_name: 'BisaPINJAM', description: 'Pinjam barang sekolah dengan QR', lang: 'id',
+    name: 'BisaPINJAM', short_name: 'BisaPINJAM', description: 'Pinjam barang dengan QR', lang: 'id',
     start_url: 'index.html', scope: './', display: 'standalone', orientation: 'portrait',
     background_color: '#1f63c9', theme_color: '#1f63c9', icons,
     shortcuts: [{ name: 'Masuk admin', short_name: 'Admin', url: 'admin.html' }]
