@@ -335,6 +335,42 @@ body.printing #toast{display:none!important}
 /* ===== waktu posting & jam langsung ===== */
 .pdt{font-size:.7rem;color:var(--mute);margin:1px 0 0}
 .clk{text-align:center;color:rgba(255,255,255,.82);font-size:.74rem;font-weight:600;margin:-6px 0 12px}
+
+/* ===== sapaan waktu (pagi/siang/sore/malam) & chip waktu posting ===== */
+.gr{display:flex;align-items:center;gap:12px;margin:0 0 14px;padding:12px 14px;border-radius:20px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.24);color:#fff;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+.gr-i{width:46px;height:46px;border-radius:15px;display:grid;place-items:center;flex:none;background:rgba(255,255,255,.18);color:#ffd21f}
+.gr-i svg{width:26px;height:26px;stroke-width:1.8}
+.gr-i[data-k="malam"] svg{animation:twk 3.4s ease-in-out infinite}
+@keyframes twk{50%{transform:rotate(-10deg) scale(1.08)}}
+.gr-t{flex:1;min-width:0}
+.gr-t small{display:block;font-size:.7rem;letter-spacing:.09em;text-transform:uppercase;font-weight:700;opacity:.82}
+.gr-t b{display:block;font-size:1.05rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gr-c{text-align:right;flex:none}
+.gr-c b{display:block;font-size:1.3rem;font-weight:800;letter-spacing:.02em;line-height:1.15}
+.gr-c small{font-size:.68rem;opacity:.82}
+body[data-tod="malam"] .hd{background:radial-gradient(1.6px 1.6px at 12% 14%,#fff,transparent),radial-gradient(1px 1px at 30% 7%,#fff,transparent),radial-gradient(1.6px 1.6px at 62% 11%,#fff,transparent),radial-gradient(1px 1px at 82% 19%,#fff,transparent),radial-gradient(1.2px 1.2px at 93% 6%,#fff,transparent),radial-gradient(1px 1px at 46% 24%,#fff,transparent),radial-gradient(1px 1px at 5% 40%,#fff,transparent),linear-gradient(165deg,#12306e 0%,#1a4aa8 55%,#1f63c9 100%)}
+body[data-tod="pagi"] .hd{background:radial-gradient(circle at 88% 4%,rgba(255,210,31,.55),transparent 38%),linear-gradient(165deg,#4a9df3,#1f63c9 60%,#1a56b8)}
+body[data-tod="siang"] .hd{background:radial-gradient(circle at 85% 0%,rgba(255,225,86,.45),transparent 40%),linear-gradient(165deg,#3a86ec,#1f63c9 60%,#1a56b8)}
+body[data-tod="sore"] .hd{background:radial-gradient(circle at 10% 100%,rgba(255,170,60,.38),transparent 45%),radial-gradient(circle at 90% 6%,rgba(255,210,31,.3),transparent 40%),linear-gradient(165deg,#3a6fd8,#2a56b8 60%,#1d46a0)}
+.pdt{display:inline-flex;align-items:center;gap:5px;margin:5px 0 0;padding:3px 9px 3px 7px;border-radius:999px;background:var(--tint);color:var(--tinttxt);font-size:.68rem;font-weight:600;line-height:1.4}
+.pdt svg{width:12px;height:12px;stroke-width:2;flex:none}
+.pact{position:static;justify-content:flex-end;margin:8px 0 0}
+
+/* ===== tahapan bergaris (admin) dan tracker struk ===== */
+.stp{display:flex;margin:6px 0 14px}
+.stp-i{position:relative;flex:1;min-width:0;border:0;background:none;display:grid;justify-items:center;align-content:start;gap:8px;padding:0 2px;color:var(--mute)}
+.stp-i:not(:first-child)::before{content:"";position:absolute;top:19px;left:-50%;right:50%;height:3px;border-radius:3px;background:var(--line);transition:background .25s}
+.stp-i.done::before{background:#1f63c9}
+.stp-c{position:relative;z-index:1;width:40px;height:40px;border-radius:50%;display:grid;place-items:center;background:var(--soft);border:2px solid var(--line);color:var(--mute);transition:all .25s}
+.stp-c svg{width:20px;height:20px}
+.stp-i.done .stp-c{background:#1f63c9;border-color:#1f63c9;color:#fff}
+.stp-i.on .stp-c{background:#ffd21f;border-color:#ffd21f;color:#0b2d6e;box-shadow:0 0 0 6px rgba(255,210,31,.35)}
+.stp-i small{font-size:.72rem;font-weight:700;line-height:1.2;text-align:center}
+.stp-i.done small,.stp-i.on small{color:var(--ink)}
+.stp-c em{position:absolute;top:-7px;right:-9px;min-width:20px;height:20px;border-radius:10px;padding:0 5px;background:#1f63c9;color:#fff;font:700 .68rem/16px system-ui,sans-serif;text-align:center;font-style:normal;border:2px solid var(--bg)}
+.stp-i:first-child .stp-c em{background:#e5484d}
+.chip-late{color:var(--red)}
+.trk{display:block;width:100%;height:auto;margin:14px 0 0;stroke:none}
 </style>
 </head>
 <body>
@@ -395,12 +431,41 @@ const fts = (ts, short) => {
   const p = n => String(n).padStart(2, '0'), day = d.toLocaleDateString('id-ID', short ? {weekday: 'short', day: 'numeric', month: 'short', year: 'numeric'} : {weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'});
   return day + (short ? ' · ' : ' pukul ') + p(d.getHours()) + '.' + p(d.getMinutes()) + '.' + p(d.getSeconds()) + ' ' + tzName(d);
 };
-const tick = () => { const c = q('#clk'); if (c) c.textContent = fts(Date.now(), true); };
+const CAL = '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>';
+/* sapaan sesuai waktu: ikon, teks, dan warna header ikut berubah */
+const TOD = {
+  pagi: ['Selamat pagi', '<path d="M4 18h16M7 18a5 5 0 0 1 10 0M12 5v3M9.5 7L12 4.5 14.5 7M4.9 11.4l1.5 1.5M19.1 11.4l-1.5 1.5"/>'],
+  siang: ['Selamat siang', '<circle cx="12" cy="12" r="4"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6L7 7M17 17l1.4 1.4M5.6 18.4L7 17M17 7l1.4-1.4"/>'],
+  sore: ['Selamat sore', '<path d="M4 18h16M7 18a5 5 0 0 1 10 0M12 6v3M9.5 8L12 10.5 14.5 8M4.9 12.4l1.5 1.5M19.1 12.4l-1.5 1.5"/>'],
+  malam: ['Selamat malam', '<path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/><path d="M17 3.5v3M15.5 5h3"/>']
+};
+const todKey = h => h >= 5 && h < 11 ? 'pagi' : h >= 11 && h < 15 ? 'siang' : h >= 15 && h < 18 ? 'sore' : 'malam';
+const greetHtml = name => `<div class="gr"><div class="gr-i" id="gI"></div><div class="gr-t"><small id="gT"></small><b>Halo, ${esc(name)}</b></div><div class="gr-c"><b id="gC">--:--:--</b><small id="gD"></small></div></div>`;
+const tick = () => {
+  const d = new Date(), k = todKey(d.getHours()), p = n => String(n).padStart(2, '0');
+  if (document.body.dataset.tod !== k) document.body.dataset.tod = k;
+  const gi = q('#gI'); if (gi && gi.dataset.k !== k) { gi.dataset.k = k; gi.innerHTML = `<svg viewBox="0 0 24 24" aria-hidden="true">${TOD[k][1]}</svg>`; const t = q('#gT'); if (t) t.textContent = TOD[k][0]; }
+  const c = q('#gC'); if (c) c.textContent = p(d.getHours()) + ':' + p(d.getMinutes()) + ':' + p(d.getSeconds());
+  const dd = q('#gD'); if (dd) dd.textContent = d.toLocaleDateString('id-ID', {weekday: 'short', day: 'numeric', month: 'short'}) + ' · ' + tzName(d);
+};
 tick(); setInterval(tick, 1000);
 const strukOk = ['diajukan', 'disetujui', 'dipinjam', 'selesai'];
 const strukTitle = {diajukan: ['Pengajuan Terkirim', 'wait'], disetujui: ['Peminjaman Disetujui', 'ok'], dipinjam: ['Barang Sedang Dipinjam', 'ok'], selesai: ['Peminjaman Selesai', 'ok']};
 const fdt = d => d ? new Date(d + 'T00:00').toLocaleDateString('id-ID', {day: 'numeric', month: 'long', year: 'numeric'}) : '-';
 const VB = `<svg class="vb" viewBox="0 0 24 24" role="img" aria-label="Terverifikasi"><g fill="#1d9bf0" stroke="none"><rect x="3.2" y="3.2" width="17.6" height="17.6" rx="4.5"/><rect x="3.2" y="3.2" width="17.6" height="17.6" rx="4.5" transform="rotate(45 12 12)"/></g><path d="M8 12.4l2.8 2.8 5.2-5.6" fill="none" stroke="#fff" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+/* tracker tahapan di struk (SVG supaya rapi saat dicetak dan jadi PDF) */
+const trk = st => {
+  const ix = ['diajukan', 'disetujui', 'dipinjam', 'selesai'].indexOf(st), L = ['Diajukan', 'Siap diambil', 'Dipinjam', 'Selesai'], X = [40, 120, 200, 280];
+  let g = '';
+  for (let k = 0; k < 3; k++) g += `<line x1="${X[k] + 15}" y1="22" x2="${X[k + 1] - 15}" y2="22" stroke="${k < ix ? '#1f63c9' : '#d5e3f7'}" stroke-width="3" stroke-linecap="round"/>`;
+  L.forEach((t, k) => {
+    const done = k < ix || (k === ix && st === 'selesai'), now = k === ix && !done;
+    g += (now ? `<circle cx="${X[k]}" cy="22" r="19" fill="#ffd21f" fill-opacity=".35" stroke="none"/>` : '') + `<circle cx="${X[k]}" cy="22" r="13" fill="${done ? '#1f63c9' : now ? '#ffd21f' : '#ffffff'}" stroke="${done ? '#1f63c9' : now ? '#ffd21f' : '#c3d5ef'}" stroke-width="2"/>`;
+    g += done ? `<path d="M${X[k] - 5} 22.5l3.5 3.5 7-7.5" fill="none" stroke="#ffffff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>` : `<text x="${X[k]}" y="26.5" text-anchor="middle" font-size="12" font-weight="700" fill="${now ? '#0b2d6e' : '#8fa3c4'}" stroke="none">${k + 1}</text>`;
+    g += `<text x="${X[k]}" y="57" text-anchor="middle" font-size="10.5" font-weight="${k <= ix ? 700 : 500}" fill="${k <= ix ? '#0d2b5e' : '#8fa3c4'}" stroke="none">${t}</text>`;
+  });
+  return `<svg class="trk" viewBox="0 0 320 64" role="img" aria-label="Tahapan peminjaman">${g}</svg>`;
+};
 const zig = top => { let d = top ? 'M0 10' : 'M0 0'; for (let k = 0; k < 20; k++) d += top ? ` L${k * 10 + 5} 0 L${k * 10 + 10} 10` : ` L${k * 10 + 5} 10 L${k * 10 + 10} 0`; return `<svg class="zig" viewBox="0 0 200 10" preserveAspectRatio="none" aria-hidden="true"><path d="${d} Z" fill="#fff" stroke="none"/></svg>`; };
 function strukHtml(l) {
   const i = item(l.item) || {name: l.item}, [ttl, kind] = strukTitle[l.status] || ['Bukti Peminjaman', 'ok'];
@@ -409,9 +474,9 @@ function strukHtml(l) {
   const ver = ['disetujui', 'dipinjam', 'selesai'].includes(l.status), sig = l.sig && String(l.sig).startsWith('data:image/png;base64,');
   return `<div class="sk-wrap" id="strukWrap"><div class="sk-paper">${zig(true)}<div class="struk" id="struk"><div class="sk-top ${kind}"><div class="sk-ck"><svg viewBox="0 0 24 24" stroke-width="3">${icon}</svg></div><h3>${ttl}</h3><p>${esc(STAT[l.status][0])}</p></div>
 <div class="sk-brand"><span>BisaPINJAM${VB}</span><small>Bukti Peminjaman Barang</small></div>
-<div class="sk-code">${esc(l.id)}</div>${ver ? `<p class="sk-ver">${VB}Terverifikasi oleh admin</p>` : ''}<hr>
+<div class="sk-code">${esc(l.id)}</div>${ver ? `<p class="sk-ver">${VB}Terverifikasi oleh admin</p>` : ''}${trk(l.status)}<hr>
 ${row('Barang', i.name)}${row('Jumlah', l.qty + ' unit')}${row('Peminjam', l.who)}${row('Kelas', l.kelas)}${row('Tujuan', l.purpose)}${row('Alamat', l.addr)}<hr>
-${row('Diajukan', l.ts ? fts(l.ts) : '')}${row('Tgl pinjam', fdt(l.date))}${row('Rencana kembali', fdt(l.due))}${l.ret ? row('Dikembalikan', fdt(l.ret.date)) + row('Kondisi', l.ret.cond) : ''}${row('Catatan', l.note)}<hr>
+${row('Tgl pinjam', fdt(l.date))}${row('Rencana kembali', fdt(l.due))}${l.ret ? row('Dikembalikan', fdt(l.ret.date)) + row('Kondisi', l.ret.cond) : ''}${row('Catatan', l.note)}<hr>
 ${sig ? `<div class="sk-sig"><img src="${esc(l.sig)}" alt="Tanda tangan peminjam"><span>${esc(l.who)}</span><small>Tanda tangan peminjam</small></div>` : ''}
 <div class="sk-qr" id="skQr"></div><p class="sk-note">Tunjukkan struk ini saat mengambil dan mengembalikan barang.</p>
 <p class="sk-foot">Dicetak ${fts(Date.now())}</p></div>${zig(false)}</div></div>`;
@@ -458,7 +523,7 @@ const loanInfo = l => {
   const i = item(l.item) || {name: l.item}, [s, c] = STAT[l.status], late = l.status === 'dipinjam' && l.due < today();
   return `<div class="t"><span class="code">${esc(l.id)}</span><span class="st ${c}">${s}${['disetujui', 'dipinjam', 'selesai'].includes(l.status) ? VB : ''}</span></div>
 <h3>${esc(i.name)} × ${l.qty}</h3><p class="note">${esc(l.who)}${l.kelas ? ' (' + esc(l.kelas) + ')' : ''}, untuk ${esc(l.purpose)}</p>
-<p class="small">Pinjam ${fmt(l.date)}, kembali ${fmt(l.due)}${l.ret ? `, dikembalikan ${fmt(l.ret.date)} (${esc(l.ret.cond.toLowerCase())})` : ''}${late ? ' <b class="late">Terlambat</b>' : ''}</p>${l.ts ? `<p class="small note">Diajukan: ${fts(l.ts)}</p>` : ''}${l.addr ? `<p class="small note">Alamat: ${esc(l.addr)}</p>` : ''}${l.note ? `<p class="small note">Catatan admin: ${esc(l.note)}</p>` : ''}`;
+<p class="small">Pinjam ${fmt(l.date)}, kembali ${fmt(l.due)}${l.ret ? `, dikembalikan ${fmt(l.ret.date)} (${esc(l.ret.cond.toLowerCase())})` : ''}${late ? ' <b class="late">Terlambat</b>' : ''}</p>${l.addr ? `<p class="small note">Alamat: ${esc(l.addr)}</p>` : ''}${l.note ? `<p class="small note">Catatan admin: ${esc(l.note)}</p>` : ''}`;
 };
 
 </script>
@@ -511,7 +576,7 @@ async function pwaInstall() {
 const photo = (src, emo, alt, cls = '') => `<div class="ph ${cls}"><span class="ico">${ic(emo)}</span>${src ? `<img src="${esc(src)}" alt="${esc(alt)}" loading="${cls.includes('eager') ? 'eager' : 'lazy'}" decoding="async" onerror="this.remove()">` : ''}</div>`;
 const card = i => `<article class="pc"><button class="fav" data-fav="${esc(i.id)}" aria-pressed="${favs.has(i.id)}" aria-label="Tandai ${esc(i.name)} sebagai favorit">${ic('heart')}</button>
 <button class="pcb" data-open="${esc(i.id)}">${photo(i.img, EMO[i.cat] || 'box', i.name)}${i.stock ? `<span class="nb">${i.stock}</span>` : ''}<h4>${esc(i.name)}</h4>
-<div class="meta"><p class="av ${i.stock ? '' : 'none'}">${i.stock ? i.stock + ' tersedia' : 'Stok habis'}</p>${i.ts ? `<p class="pdt">Diposting ${fts(i.ts, true)}</p>` : ''}</div></button><div class="pact"><button type="button" data-qrshow="${esc(i.id)}" aria-label="Lihat QR ${esc(i.name)}">${ic('qr')}QR</button><button type="button" class="addb" data-open="${esc(i.id)}" ${i.stock ? '' : 'disabled'}>${ic('plus')}Tambah</button></div></article>`;
+<div class="meta"><p class="av ${i.stock ? '' : 'none'}">${i.stock ? i.stock + ' tersedia' : 'Stok habis'}</p>${i.ts ? `<p class="pdt">${CAL}Diposting ${fts(i.ts, true)}</p>` : ''}</div></button><div class="pact"><button type="button" data-qrshow="${esc(i.id)}" aria-label="Lihat QR ${esc(i.name)}">${ic('qr')}QR</button><button type="button" class="addb" data-open="${esc(i.id)}" ${i.stock ? '' : 'disabled'}>${ic('plus')}Tambah</button></div></article>`;
 const mineActive = () => D.loans.filter(l => ['diajukan', 'disetujui', 'dipinjam'].includes(l.status));
 const filtered = () => D.items.filter(i => (i.name + i.cat + i.id).toLowerCase().includes(term.toLowerCase()) && (!cat || i.cat === cat) && (!onlyFav || favs.has(i.id)) && (!okOnly || i.stock));
 const gridHtml = l => l.length ? l.map(card).join('') : `<p class="empty">${!D.items.length ? 'Belum ada barang. Admin belum menambahkan stok.' : onlyFav ? 'Belum ada favorit. Ketuk ikon hati pada barang.' : 'Tidak ada barang yang cocok. Coba kata kunci atau kategori lain.'}</p>`;
@@ -524,7 +589,8 @@ const views = {
   home: () => {
     const hot = [...D.items].filter(i => flt === 'all' || i.stock).sort((a, b) => (b.total - b.stock) - (a.total - a.stock)).slice(0, 4);
     const n = mineActive().length;
-    return `<div class="hd"><div class="top"><img class="logo" src="icon.jpg" alt="" onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'logo logo-fb',textContent:'B'}))"><div class="ttl"><span class="word">BisaPINJAM${VB}</span><span class="hi">Halo, ${esc(me || 'Peminjam')}</span><span class="hi" id="clk"></span></div><div style="display:flex"><button class="ibtn" data-heart aria-label="Barang favorit">${ic('heart')}</button><button class="ibtn" data-tab="mine" aria-label="Pinjaman saya">${ic('bag')}${n ? `<span class="badge">${n}</span>` : ''}</button></div></div>
+    return `<div class="hd"><div class="top"><img class="logo" src="icon.jpg" alt="" onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'logo logo-fb',textContent:'B'}))"><div class="ttl"><span class="word">BisaPINJAM${VB}</span></div><div style="display:flex"><button class="ibtn" data-heart aria-label="Barang favorit">${ic('heart')}</button><button class="ibtn" data-tab="mine" aria-label="Pinjaman saya">${ic('bag')}${n ? `<span class="badge">${n}</span>` : ''}</button></div></div>
+${greetHtml(me || 'Peminjam')}
 ${seg()}
 <form class="search" id="hs">${ic('search')}<input id="hq" type="search" placeholder="Cari nama atau kode barang" aria-label="Cari barang"><button type="button" class="flt" data-tab="barang" aria-label="Lihat semua barang">${ic('sliders')}</button></form></div>
 <div class="sheetc">${pwaBanner()}<div class="quick"><button data-tab="scan"><i class="q1">${ic('qr')}</i>Scan QR</button><button data-tab="barang"><i class="q2">${ic('grid')}</i>Barang</button><button data-heart><i class="q3">${ic('heart')}</i>Favorit</button><button data-tab="mine"><i class="q4">${ic('bag')}</i>Pinjaman</button></div>
@@ -583,7 +649,7 @@ function borrow(raw) {
   const i = item(codeOf(raw));
   if (!i) return toast('Kode barang tidak terdaftar');
   if (!i.stock) return toast(i.name + ' sedang habis');
-  q('#dlgBody').innerHTML = `${photo(i.img, EMO[i.cat] || 'box', i.name)}<div class="t"><h2>${esc(i.name)}</h2><span class="st ok">${i.stock} tersedia</span></div><p class="note">${esc(i.loc)} · kondisi ${esc(i.cond.toLowerCase())}</p>${i.ts ? `<p class="small note">Diposting: ${fts(i.ts)}</p>` : ''}
+  q('#dlgBody').innerHTML = `${photo(i.img, EMO[i.cat] || 'box', i.name)}<div class="t"><h2>${esc(i.name)}</h2><span class="st ok">${i.stock} tersedia</span></div><p class="note">${esc(i.loc)} · kondisi ${esc(i.cond.toLowerCase())}</p>${i.ts ? `<p class="pdt">${CAL}Diposting ${fts(i.ts)}</p>` : ''}
 <form id="bf" data-id="${esc(i.id)}"><label>Nama peminjam<input name="who" required autocomplete="name" value="${esc(me)}"></label>
 <label>Kelas<input name="kelas" required value="${esc(kelas)}" placeholder="Contoh: XI TKJ 1"></label>
 <label>Alamat lengkap<input name="addr" required autocomplete="street-address" value="${esc(addr)}" placeholder="Contoh: Jl. Sudirman No. 10, Pekanbaru"></label>
