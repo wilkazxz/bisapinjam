@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#1f63c9">
 <link rel="icon" type="image/jpeg" href="icon.jpg">
-<link rel="apple-touch-icon" href="icon.jpg">
+<link rel="apple-touch-icon" href="/api/icon">
 <link rel="manifest" href="manifest.json">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -908,17 +908,18 @@ const root=q(A?'#view':'#main'),mo=new MutationObserver(()=>{mo.disconnect();enh
 /* Ikon aplikasi: diubah admin lewat galeri, disimpan di Firestore (settings/app), tampil di index & admin */
 (()=>{
 const A=!!q('#tabs');let ic=null,nw='';try{ic=localStorage.getItem('pp-icon')}catch(e){}
-const links=u=>document.querySelectorAll('link[rel=icon],link[rel=apple-touch-icon]').forEach(l=>{l.href=u});
+const links=u=>document.querySelectorAll('link[rel=icon]').forEach(l=>{l.href=u});
 const apply=u=>{document.querySelectorAll('.logo').forEach(e=>{if(e.tagName==='IMG'){if(e.getAttribute('src')!==u)e.src=u}else{const i=document.createElement('img');i.className='logo';i.alt='';i.src=u;e.replaceWith(i)}});links(u)};
 if(ic)apply(ic);
 db.collection('settings').doc('app').onSnapshot(s=>{ic=s.exists?(s.data().icon||''):'';try{localStorage.setItem('pp-icon',ic)}catch(e){}
  if(ic)apply(ic);else{document.querySelectorAll('img.logo').forEach(e=>e.setAttribute('src','icon.jpg'));links('icon.jpg')}},()=>{});
 new MutationObserver(()=>{if(ic)apply(ic)}).observe(document.body,{childList:true,subtree:true});
 if(!A)return;
-const sq=f=>new Promise((ok,no)=>{const u=URL.createObjectURL(f),im=new Image();im.onload=()=>{const s=Math.min(im.naturalWidth,im.naturalHeight),c=document.createElement('canvas');c.width=c.height=256;c.getContext('2d').drawImage(im,(im.naturalWidth-s)/2,(im.naturalHeight-s)/2,s,s,0,0,256,256);URL.revokeObjectURL(u);ok(c.toDataURL('image/jpeg',.8))};im.onerror=()=>no(new Error('Foto tidak bisa dibaca'));im.src=u});
+const sq=f=>new Promise((ok,no)=>{const u=URL.createObjectURL(f),im=new Image();im.onload=()=>{const s=Math.min(im.naturalWidth,im.naturalHeight),c=document.createElement('canvas');c.width=c.height=512;c.getContext('2d').drawImage(im,(im.naturalWidth-s)/2,(im.naturalHeight-s)/2,s,s,0,0,512,512);URL.revokeObjectURL(u);ok(c.toDataURL('image/jpeg',.9))};im.onerror=()=>no(new Error('Foto tidak bisa dibaca'));im.src=u});
 const pv=u=>{const p=q('#icp');if(p)p.innerHTML=u?`<img src="${esc(u)}" alt="">`:'Ikon bawaan'};
-function open_(){nw='';q('#dlgBody').innerHTML=`<h2>Ikon aplikasi</h2><p class="note">Foto di pojok atas halaman. Pilih dari galeri, otomatis dipotong persegi.</p><div class="fprev" id="icp" style="height:140px;width:140px;margin:14px auto"></div><input type="file" id="icf" accept="image/*" hidden><div class="row"><button type="button" class="btn" data-sx-ipick>Pilih foto</button><button type="button" class="btn bad" data-sx-ireset>Ikon bawaan</button></div><div class="row"><button type="button" class="btn" data-close>Batal</button><button type="button" class="btn pri" data-sx-isave>Simpan</button></div>`;q('#dlg').showModal();pv(ic)}
-const save=(v,m)=>db.collection('settings').doc('app').set({icon:v}).then(()=>{closeDlg();toast(m)}).catch(dbErr);
+function open_(){nw='';q('#dlgBody').innerHTML=`<h2>Ikon aplikasi</h2><p class="note">Dipakai di pojok halaman dan ikon aplikasi di layar utama (Android ikut berubah otomatis dalam 1-3 hari). Pilih dari galeri, otomatis dipotong persegi.</p><div class="fprev" id="icp" style="height:140px;width:140px;margin:14px auto"></div><input type="file" id="icf" accept="image/*" hidden><div class="row"><button type="button" class="btn" data-sx-ipick>Pilih foto</button><button type="button" class="btn bad" data-sx-ireset>Ikon bawaan</button></div><div class="row"><button type="button" class="btn" data-close>Batal</button><button type="button" class="btn pri" data-sx-isave>Simpan</button></div>`;q('#dlg').showModal();pv(ic)}
+const mk=u=>new Promise(ok=>{const im=new Image();im.onload=()=>{const c=document.createElement('canvas');c.width=c.height=512;const x=c.getContext('2d');x.drawImage(im,0,0,1,1,0,0,1,1);const p=x.getImageData(0,0,1,1).data;x.fillStyle='rgb('+p[0]+','+p[1]+','+p[2]+')';x.fillRect(0,0,512,512);x.drawImage(im,64,64,384,384);ok(c.toDataURL('image/jpeg',.9))};im.src=u});
+const save=(v,m)=>(v?mk(v):Promise.resolve('')).then(iM=>db.collection('settings').doc('app').set({icon:v,iconM:iM})).then(()=>{closeDlg();toast(m)}).catch(dbErr);
 const ov=views.stok;views.stok=()=>ov().replace('<div class="row flush"><button class="btn pri" data-act="baru">','<div class="row flush"><button class="btn" data-sx-icon>Ubah ikon</button><button class="btn pri" data-act="baru">');
 document.addEventListener('click',e=>{const t=e.target.closest('button,.logo');if(!t)return;const d=t.dataset||{},h=()=>{e.stopImmediatePropagation();e.preventDefault()};
  if(t.classList.contains('logo')){if(admin){h();open_()}}
