@@ -348,6 +348,16 @@ body.printing #toast{display:none!important}
 .gr-c{text-align:right;flex:none}
 .gr-c b{display:block;font-size:1.3rem;font-weight:800;letter-spacing:.02em;line-height:1.15}
 .gr-c small{font-size:.68rem;opacity:.82}
+/* jam <-> kata penyemangat: dua muka bergulir ke bawah bersamaan (durasi, kurva, jarak sama) */
+.gr-roll{--d:.8s;--e:cubic-bezier(.65,0,.35,1);display:grid;width:9.2rem;overflow:hidden;text-align:right}
+.gr-f{grid-area:1/1;display:flex;flex-direction:column;justify-content:center;align-items:flex-end;opacity:0;will-change:transform,opacity;pointer-events:none}
+.gr-f.on{opacity:1}
+.gr-f.in{animation:grIn var(--d) var(--e) both}
+.gr-f.out{animation:grOut var(--d) var(--e) both}
+@keyframes grIn{from{opacity:0;transform:translate3d(0,-100%,0)}to{opacity:1;transform:translate3d(0,0,0)}}
+@keyframes grOut{from{opacity:1;transform:translate3d(0,0,0)}to{opacity:0;transform:translate3d(0,100%,0)}}
+.gr-c b.cd{font-size:.98rem;white-space:nowrap;max-width:100%;overflow:hidden;text-overflow:ellipsis}
+.gr-f small{white-space:nowrap;max-width:100%;overflow:hidden;text-overflow:ellipsis}
 body[data-tod="malam"] .hd{background:radial-gradient(1.6px 1.6px at 12% 14%,#fff,transparent),radial-gradient(1px 1px at 30% 7%,#fff,transparent),radial-gradient(1.6px 1.6px at 62% 11%,#fff,transparent),radial-gradient(1px 1px at 82% 19%,#fff,transparent),radial-gradient(1.2px 1.2px at 93% 6%,#fff,transparent),radial-gradient(1px 1px at 46% 24%,#fff,transparent),radial-gradient(1px 1px at 5% 40%,#fff,transparent),linear-gradient(165deg,#12306e 0%,#1a4aa8 55%,#1f63c9 100%)}
 body[data-tod="pagi"] .hd{background:radial-gradient(circle at 88% 4%,rgba(255,210,31,.55),transparent 38%),linear-gradient(165deg,#4a9df3,#1f63c9 60%,#1a56b8)}
 body[data-tod="siang"] .hd{background:radial-gradient(circle at 85% 0%,rgba(255,225,86,.45),transparent 40%),linear-gradient(165deg,#3a86ec,#1f63c9 60%,#1a56b8)}
@@ -440,7 +450,9 @@ const TOD = {
   malam: ['Selamat malam', '<path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/><path d="M17 3.5v3M15.5 5h3"/>']
 };
 const todKey = h => h >= 5 && h < 11 ? 'pagi' : h >= 11 && h < 15 ? 'siang' : h >= 15 && h < 18 ? 'sore' : 'malam';
-const greetHtml = name => `<div class="gr"><div class="gr-i" id="gI"></div><div class="gr-t"><small id="gT"></small><b>Halo, ${esc(name)}</b></div><div class="gr-c"><b id="gC">--:--:--</b><small id="gD"></small></div></div>`;
+const WORDS = [['Semangat ya!', 'Hari ini pasti lancar'], ['Kamu hebat', 'Terus melangkah'], ['Pelan tak apa', 'Yang penting jalan'], ['Kamu bisa!', 'Satu langkah lagi'], ['Tetap tenang', 'Semua ada jalannya'], ['Jangan menyerah', 'Usahamu berarti'], ['Hari baru', 'Mulai dengan senyum'], ['Tetap semangat', 'Kamu lebih kuat']];
+let grS = 0, grW = Math.floor(Math.random() * WORDS.length); /* grS: 0 = jam, 1 = kata penyemangat */
+const greetHtml = name => `<div class="gr"><div class="gr-i" id="gI"></div><div class="gr-t"><small id="gT"></small><b>Halo, ${esc(name)}</b></div><div class="gr-c"><div class="gr-roll" id="gR"><div class="gr-f${grS ? '' : ' on'}"><b id="gC">--:--:--</b><small id="gD"></small></div><div class="gr-f${grS ? ' on' : ''}"><b class="cd" id="gB">${WORDS[grW][0]}</b><small id="gBs">${WORDS[grW][1]}</small></div></div></div></div>`;
 const tick = () => {
   const d = new Date(), k = todKey(d.getHours()), p = n => String(n).padStart(2, '0');
   if (document.body.dataset.tod !== k) document.body.dataset.tod = k;
@@ -449,6 +461,15 @@ const tick = () => {
   const dd = q('#gD'); if (dd) dd.textContent = d.toLocaleDateString('id-ID', {weekday: 'short', day: 'numeric', month: 'short'}) + ' · ' + tzName(d);
 };
 tick(); setInterval(tick, 1000);
+setInterval(() => {
+  const r = q('#gR'); if (!r || document.hidden) return;
+  const a = r.children[grS], b = r.children[1 - grS];
+  if (grS === 0) { grW = (grW + 1) % WORDS.length; q('#gB').textContent = WORDS[grW][0]; q('#gBs').textContent = WORDS[grW][1]; } /* kata baru tiap kali menuju muka kata */
+  b.classList.remove('out'); a.classList.remove('on', 'in');
+  a.classList.add('out'); b.classList.add('on', 'in'); /* keduanya mulai di frame yang sama */
+  grS = 1 - grS;
+  setTimeout(() => { a.classList.remove('out'); b.classList.remove('in'); }, 900);
+}, 5000);
 const strukOk = ['diajukan', 'disetujui', 'dipinjam', 'selesai'];
 const strukTitle = {diajukan: ['Pengajuan Terkirim', 'wait'], disetujui: ['Peminjaman Disetujui', 'ok'], dipinjam: ['Barang Sedang Dipinjam', 'ok'], selesai: ['Peminjaman Selesai', 'ok']};
 const fdt = d => d ? new Date(d + 'T00:00').toLocaleDateString('id-ID', {day: 'numeric', month: 'long', year: 'numeric'}) : '-';
