@@ -381,6 +381,25 @@ body[data-tod="sore"] .hd{background:radial-gradient(circle at 10% 100%,rgba(255
 .stp-i:first-child .stp-c em{background:#e5484d}
 .chip-late{color:var(--red)}
 .trk{display:block;width:100%;height:auto;margin:14px 0 0;stroke:none}
+
+/* ===== daftar barang ala Pinterest (masonry): foto mengikuti rasio asli, kolom rapi ===== */
+.grid2{display:block;column-count:2;column-gap:12px}
+.pc{position:relative;display:inline-block;width:100%;break-inside:avoid;-webkit-column-break-inside:avoid;margin:0 0 12px;padding:0;border:0;background:var(--soft);border-radius:18px;box-shadow:var(--shadow);overflow:hidden;vertical-align:top}
+.pc .pcb{display:block;width:100%;text-align:left;padding:0}
+.pc .pcb .ph{width:100%;height:auto;min-height:120px;margin:0;border-radius:0;grid-row:auto;display:block}
+.pc .pcb .ph .ico{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%)}
+.pc .pcb .ph img{position:static;display:block;width:100%;height:auto;max-height:340px;object-fit:cover}
+.pc .pcb .ph:has(img){min-height:0}
+.pc .pcb h4{margin:10px 12px 2px;font-size:.92rem;-webkit-line-clamp:2}
+.pc .meta{padding:0 12px}
+.pc .pdt{margin-top:4px}
+.pc .nb{left:8px;top:8px;border:0;box-shadow:0 2px 6px rgba(0,0,0,.18)}
+.pc .fav{top:8px;right:8px;width:32px;height:32px;background:rgba(255,255,255,.88);color:#6b6f94;box-shadow:0 2px 6px rgba(0,0,0,.15)}
+.pc .fav[aria-pressed="true"]{color:#f2555f}
+.pc .pact{position:static;display:flex;gap:6px;padding:10px 12px 12px}
+.pc .pact button{flex:1;padding:0 8px}
+#main>.grid2{margin-left:18px;margin-right:18px}
+@media(min-width:900px){.app{max-width:760px}.grid2{column-count:3}}
 </style>
 </head>
 <body>
