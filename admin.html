@@ -371,6 +371,11 @@ body[data-tod="sore"] .hd{background:radial-gradient(circle at 10% 100%,rgba(255
 .stp-i:first-child .stp-c em{background:#e5484d}
 .chip-late{color:var(--red)}
 .trk{display:block;width:100%;height:auto;margin:14px 0 0;stroke:none}
+
+/* ===== daftar stok ala Pinterest: foto mengikuti rasio asli ===== */
+.grid.mas{display:block;column-width:230px;column-gap:12px}
+.grid.mas .card{display:inline-block;width:100%;break-inside:avoid;-webkit-column-break-inside:avoid;margin:0 0 12px;overflow:hidden}
+.grid.mas .mimg{display:block;width:calc(100% + 32px);max-width:none;max-height:340px;margin:-16px -16px 12px;object-fit:cover}
 </style>
 </head>
 <body>
@@ -592,7 +597,7 @@ ${stepper(n)}
 <div class="grid" id="alist">${listHtml()}</div>`;
   },
   stok: () => `<div class="row flush"><button class="btn pri" data-act="baru">+ Tambah barang</button></div>
-<div class="grid">${D.items.length ? D.items.map(i => `<article class="card"><div class="t"><span class="code">${esc(i.id)}</span><span class="note">${esc(i.cat)}</span></div>
+<div class="grid mas">${D.items.length ? D.items.map(i => `<article class="card">${i.img ? `<img class="mimg" src="${esc(i.img)}" alt="${esc(i.name)}" loading="lazy" onerror="this.remove()">` : ''}<div class="t"><span class="code">${esc(i.id)}</span><span class="note">${esc(i.cat)}</span></div>
 <h3>${esc(i.name)}</h3><p class="note">${esc(i.loc)}, kondisi ${i.cond === 'Baik' ? 'baik' : '<b class="late">' + esc(i.cond.toLowerCase()) + '</b>'}</p><p class="pdt">${CAL}${i.ts ? 'Diposting ' + fts(i.ts) : 'Waktu posting tidak tercatat'}</p><p class="small"><b>${i.stock}</b> tersedia dari ${i.total}${i.stock === 0 ? ' <b class="late">Habis</b>' : ''}</p>
 <div class="row"><button class="btn" data-qrshow="${esc(i.id)}">QR</button><button class="btn" data-edit="${esc(i.id)}">Ubah</button><button class="btn bad" data-del="${esc(i.id)}">Hapus</button></div></article>`).join('') : '<p class="empty">Belum ada barang. Tekan "+ Tambah barang" untuk mulai.</p>'}</div>`,
   qr: () => `<div class="row flush"><button class="btn pri" onclick="print()">Cetak semua label</button></div>
