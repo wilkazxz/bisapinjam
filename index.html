@@ -399,7 +399,21 @@ body[data-tod="sore"] .hd{background:radial-gradient(circle at 10% 100%,rgba(255
 .pc .pact{position:static;display:flex;gap:6px;padding:10px 12px 12px}
 .pc .pact button{flex:1;padding:0 8px}
 #main>.grid2{margin-left:18px;margin-right:18px}
-@media(min-width:900px){.app{max-width:760px}.grid2{column-count:3}}
+/* ===== responsif: HP, iPad, laptop ===== */
+@media(min-width:768px){
+.app{max-width:980px}
+.grid2{column-count:3;column-gap:16px}
+.pc{margin-bottom:16px}
+.pc .pcb .ph img{max-height:380px}
+#main>.sk,#main>.grid2{margin-left:24px;margin-right:24px}
+.fab{right:max(16px,calc(50% - 474px))}
+dialog{margin:auto;border-radius:24px;width:min(560px,92vw)}
+}
+@media(min-width:1200px){
+.app{max-width:1240px}
+.grid2{column-count:4}
+.fab{right:max(16px,calc(50% - 604px))}
+}
 </style>
 </head>
 <body>
@@ -971,6 +985,14 @@ document.addEventListener('click',e=>{const t=e.target.closest('button,.logo');i
 document.addEventListener('change',async e=>{if(e.target.id!=='icf'||!e.target.files[0])return;try{nw=await sq(e.target.files[0]);pv(nw)}catch(x){toast(x.message)}e.target.value=''});
 })();
 </script>
-<script>if ('serviceWorker' in navigator && /^https?:/.test(location.protocol)) addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));</script>
+<script>
+/* Service worker: cek versi baru tiap halaman dibuka/dikembalikan ke depan, lalu muat ulang sekali otomatis agar tampilan terbaru langsung terpakai */
+if ('serviceWorker' in navigator && /^https?:/.test(location.protocol)) {
+  let reg = null, had = !!navigator.serviceWorker.controller, done = false;
+  addEventListener('load', () => navigator.serviceWorker.register('sw.js', {updateViaCache: 'none'}).then(r => { reg = r; r.update(); }).catch(() => {}));
+  document.addEventListener('visibilitychange', () => { if (!document.hidden && reg) reg.update().catch(() => {}); });
+  navigator.serviceWorker.addEventListener('controllerchange', () => { if (!had || done) return; done = true; location.reload(); });
+}
+</script>
 </body>
 </html>
