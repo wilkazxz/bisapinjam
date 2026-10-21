@@ -485,7 +485,7 @@ const TOD = {
 const todKey = h => h >= 5 && h < 11 ? 'pagi' : h >= 11 && h < 15 ? 'siang' : h >= 15 && h < 18 ? 'sore' : 'malam';
 const WORDS = [['Semangat ya!', 'Hari ini pasti lancar'], ['Kamu hebat', 'Terus melangkah'], ['Pelan tak apa', 'Yang penting jalan'], ['Kamu bisa!', 'Satu langkah lagi'], ['Tetap tenang', 'Semua ada jalannya'], ['Jangan menyerah', 'Usahamu berarti'], ['Hari baru', 'Mulai dengan senyum'], ['Tetap semangat', 'Kamu lebih kuat']];
 let grS = 0, grW = Math.floor(Math.random() * WORDS.length); /* grS: 0 = jam, 1 = kata penyemangat */
-const greetHtml = name => `<div class="gr"><div class="gr-i" id="gI"></div><div class="gr-t"><small id="gT"></small><b>Halo, ${esc(name)}</b></div><div class="gr-c"><div class="gr-roll" id="gR"><div class="gr-f${grS ? '' : ' on'}"><b id="gC">--:--:--</b><small id="gD"></small></div><div class="gr-f${grS ? ' on' : ''}"><b class="cd" id="gB">${WORDS[grW][0]}</b><small id="gBs">${WORDS[grW][1]}</small></div></div></div></div>`;
+const greetHtml = name => `<div class="gr"><div class="gr-i" id="gI"></div><div class="gr-t"><small id="gT"></small><b>${name ? 'Halo, ' + esc(name) : 'Halo!'}</b></div><div class="gr-c"><div class="gr-roll" id="gR"><div class="gr-f${grS ? '' : ' on'}"><b id="gC">--:--:--</b><small id="gD"></small></div><div class="gr-f${grS ? ' on' : ''}"><b class="cd" id="gB">${WORDS[grW][0]}</b><small id="gBs">${WORDS[grW][1]}</small></div></div></div></div>`;
 const tick = () => {
   const d = new Date(), k = todKey(d.getHours()), p = n => String(n).padStart(2, '0');
   if (document.body.dataset.tod !== k) document.body.dataset.tod = k;
@@ -644,7 +644,7 @@ const views = {
     const hot = [...D.items].filter(i => flt === 'all' || i.stock).sort((a, b) => (b.total - b.stock) - (a.total - a.stock)).slice(0, 4);
     const n = mineActive().length;
     return `<div class="hd"><div class="top"><img class="logo" src="icon.jpg" alt="" onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'logo logo-fb',textContent:'B'}))"><div class="ttl"><span class="word">BisaPINJAM${VB}</span></div><div style="display:flex"><button class="ibtn" data-heart aria-label="Barang favorit">${ic('heart')}</button><button class="ibtn" data-tab="mine" aria-label="Pinjaman saya">${ic('bag')}${n ? `<span class="badge">${n}</span>` : ''}</button></div></div>
-${greetHtml(me || 'Peminjam')}
+${greetHtml('')}
 ${seg()}
 <form class="search" id="hs">${ic('search')}<input id="hq" type="search" placeholder="Cari nama atau kode barang" aria-label="Cari barang"><button type="button" class="flt" data-tab="barang" aria-label="Lihat semua barang">${ic('sliders')}</button></form></div>
 <div class="sheetc">${pwaBanner()}<div class="quick"><button data-tab="scan"><i class="q1">${ic('qr')}</i>Scan QR</button><button data-tab="barang"><i class="q2">${ic('grid')}</i>Barang</button><button data-heart><i class="q3">${ic('heart')}</i>Favorit</button><button data-tab="mine"><i class="q4">${ic('bag')}</i>Pinjaman</button></div>
