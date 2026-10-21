@@ -375,16 +375,56 @@ body[data-tod="sore"] .hd{background:radial-gradient(circle at 10% 100%,rgba(255
 /* ===== daftar stok ala Pinterest: foto mengikuti rasio asli ===== */
 .grid.mas{display:block;column-width:230px;column-gap:12px}
 .grid.mas .card{display:inline-block;width:100%;break-inside:avoid;-webkit-column-break-inside:avoid;margin:0 0 12px;overflow:hidden}
+.grid.mas .card .row{flex-wrap:wrap}
+.grid.mas .card .row .btn{flex:1 1 64px;min-width:0;padding-left:10px;padding-right:10px}
 .grid.mas .mimg{display:block;width:calc(100% + 32px);max-width:none;max-height:340px;margin:-16px -16px 12px;object-fit:cover}
+
+/* ===== menu samping kiri (ikon garis tiga): semua tombol admin ada di sini ===== */
+.top{grid-template-columns:44px 1fr auto}
+.top .logo{display:none}
+.hd{padding-bottom:72px}
+#menuBtn[hidden]{display:grid;visibility:hidden}
+#menuBg{position:fixed;inset:0;z-index:55;background:rgba(10,12,30,.5);opacity:0;visibility:hidden;transition:opacity .25s,visibility 0s .25s}
+body.menu-open #menuBg{opacity:1;visibility:visible;transition-delay:0s}
+body.menu-open{overflow:hidden}
+nav#tabs.seg{position:fixed;top:0;bottom:0;left:0;z-index:60;width:min(290px,82vw);display:flex;flex-direction:column;align-items:stretch;gap:6px;margin:0;border-radius:0 26px 26px 0;background:linear-gradient(180deg,#1f63c9,#14418f);padding:calc(22px + env(safe-area-inset-top,0px)) 14px calc(18px + env(safe-area-inset-bottom,0px));box-shadow:8px 0 30px rgba(0,0,0,.28);overflow-y:auto;transform:translateX(-105%);visibility:hidden;transition:transform .28s cubic-bezier(.2,.8,.2,1),visibility 0s .28s}
+body.menu-open nav#tabs.seg{transform:none;visibility:visible;transition-delay:0s}
+nav#tabs.seg:empty{display:flex}
+nav#tabs.seg::before{content:"BisaPINJAM";display:flex;align-items:center;min-height:42px;margin:0 4px 16px;padding-left:54px;font-weight:800;font-size:1.05rem;color:#fff;background:url(icon.jpg) left center/42px 42px no-repeat;border-radius:13px}
+nav#tabs.seg button{flex:none;width:100%;height:50px;justify-content:flex-start;gap:14px;padding:0 16px;border-radius:14px;font-size:.95rem;text-align:left;color:#d3e3ff}
+nav#tabs.seg button svg{width:22px;height:22px;flex:none}
+nav#tabs.seg button[aria-pressed="true"]{background:#ffd21f;color:#0b2d6e}
+nav#tabs.seg button[data-out]{margin-top:auto;color:#ffd0d0;border-top:1px solid rgba(255,255,255,.16);border-radius:0 0 14px 14px;height:56px}
+@media print{#tabs,#menuBg{display:none!important}}
+/* ===== responsif admin: iPad & laptop = menu samping tetap terbuka ===== */
+@media(min-width:768px){
+.wrap{max-width:none;margin:0;padding-left:264px}
+.top{grid-template-columns:1fr auto}
+#menuBtn,#menuBtn[hidden]{display:none}
+#menuBg{display:none}
+body.menu-open{overflow:auto}
+nav#tabs.seg{width:264px;transform:none;visibility:visible;border-radius:0;box-shadow:none;transition:none}
+.hd h1{text-align:left}
+.hd{padding-left:28px;padding-right:28px}
+.sheetc{padding-left:28px;padding-right:28px}
+.hd .top,.hd #grWrap,#view>*{max-width:1100px;margin-left:auto;margin-right:auto}
+.grid.mas{column-width:auto;column-count:2;column-gap:16px}
+.stats{grid-template-columns:repeat(4,1fr)}
+.fab{right:24px}
+dialog{margin:auto;border-radius:24px;width:min(560px,92vw)}
+}
+@media(min-width:1180px){.grid.mas{column-count:3}}
+@media(min-width:1600px){.grid.mas{column-count:4}}
 </style>
 </head>
 <body>
 <div id="splash" aria-hidden="true"></div>
+<div id="menuBg" aria-hidden="true"></div>
+<nav class="seg" id="tabs" aria-label="Menu admin"></nav>
 <div class="wrap">
   <div class="hd">
-    <div class="top"><img class="logo" src="icon.jpg" alt="" onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'logo logo-fb',textContent:'B'}))"><h1>BisaPINJAM Admin<svg class="vb" viewBox="0 0 24 24" role="img" aria-label="Terverifikasi"><g fill="#1d9bf0" stroke="none"><rect x="3.2" y="3.2" width="17.6" height="17.6" rx="4.5"/><rect x="3.2" y="3.2" width="17.6" height="17.6" rx="4.5" transform="rotate(45 12 12)"/></g><path d="M8 12.4l2.8 2.8 5.2-5.6" fill="none" stroke="#fff" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/></svg></h1><a href="index.html">← Peminjam</a></div>
+    <div class="top"><button class="ibtn" id="menuBtn" type="button" aria-label="Buka menu" aria-expanded="false" aria-controls="tabs" hidden><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button><img class="logo" src="icon.jpg" alt="" onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'logo logo-fb',textContent:'B'}))"><h1>BisaPINJAM Admin<svg class="vb" viewBox="0 0 24 24" role="img" aria-label="Terverifikasi"><g fill="#1d9bf0" stroke="none"><rect x="3.2" y="3.2" width="17.6" height="17.6" rx="4.5"/><rect x="3.2" y="3.2" width="17.6" height="17.6" rx="4.5" transform="rotate(45 12 12)"/></g><path d="M8 12.4l2.8 2.8 5.2-5.6" fill="none" stroke="#fff" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/></svg></h1><a href="index.html">← Peminjam</a></div>
     <div id="grWrap"></div>
-    <div class="seg" id="tabs"></div>
   </div>
   <div id="view" class="sheetc"></div>
 </div>
@@ -874,6 +914,29 @@ document.addEventListener('click',e=>{const t=e.target.closest('button,.logo');i
 document.addEventListener('change',async e=>{if(e.target.id!=='icf'||!e.target.files[0])return;try{nw=await sq(e.target.files[0]);pv(nw)}catch(x){toast(x.message)}e.target.value=''});
 })();
 </script>
-<script>if ('serviceWorker' in navigator && /^https?:/.test(location.protocol)) addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));</script>
+<script>
+/* Service worker: cek versi baru tiap halaman dibuka/dikembalikan ke depan, lalu muat ulang sekali otomatis agar tampilan terbaru langsung terpakai */
+if ('serviceWorker' in navigator && /^https?:/.test(location.protocol)) {
+  let reg = null, had = !!navigator.serviceWorker.controller, done = false;
+  addEventListener('load', () => navigator.serviceWorker.register('sw.js', {updateViaCache: 'none'}).then(r => { reg = r; r.update(); }).catch(() => {}));
+  document.addEventListener('visibilitychange', () => { if (!document.hidden && reg) reg.update().catch(() => {}); });
+  navigator.serviceWorker.addEventListener('controllerchange', () => { if (!had || done) return; done = true; location.reload(); });
+}
+</script>
+<script>
+/* Menu samping: buka dengan ikon garis tiga, tutup dengan lapisan gelap, tombol Esc, atau setelah memilih menu */
+(function(){
+  var tabs=document.getElementById('tabs'),btn=document.getElementById('menuBtn'),bg=document.getElementById('menuBg');
+  if(!tabs||!btn||!bg)return;
+  function set(o){document.body.classList.toggle('menu-open',o);btn.setAttribute('aria-expanded',o?'true':'false');btn.setAttribute('aria-label',o?'Tutup menu':'Buka menu')}
+  function sync(){var has=tabs.children.length>0;btn.hidden=!has;if(!has)set(false)}
+  btn.addEventListener('click',function(){set(!document.body.classList.contains('menu-open'))});
+  bg.addEventListener('click',function(){set(false)});
+  document.addEventListener('keydown',function(e){if(e.key==='Escape')set(false)});
+  document.addEventListener('click',function(e){var b=e.target.closest&&e.target.closest('#tabs button');if(b)set(false)},true);
+  new MutationObserver(sync).observe(tabs,{childList:true});
+  sync();
+})();
+</script>
 </body>
 </html>
