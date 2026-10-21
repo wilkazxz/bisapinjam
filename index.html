@@ -496,7 +496,7 @@ function strukHtml(l) {
   return `<div class="sk-wrap" id="strukWrap"><div class="sk-paper">${zig(true)}<div class="struk" id="struk"><div class="sk-top ${kind}"><div class="sk-ck"><svg viewBox="0 0 24 24" stroke-width="3">${icon}</svg></div><h3>${ttl}</h3><p>${esc(STAT[l.status][0])}</p></div>
 <div class="sk-brand"><span>BisaPINJAM${VB}</span><small>Bukti Peminjaman Barang</small></div>
 <div class="sk-code">${esc(l.id)}</div>${ver ? `<p class="sk-ver">${VB}Terverifikasi oleh admin</p>` : ''}${trk(l.status)}<hr>
-${row('Barang', i.name)}${row('Jumlah', l.qty + ' unit')}${row('Peminjam', l.who)}${row('Kelas', l.kelas)}${row('Tujuan', l.purpose)}${row('Alamat', l.addr)}<hr>
+${row('Barang', i.name)}${row('Jumlah', l.qty + ' unit')}${row('Peminjam', l.who)}${row('Instansi / Unit', l.kelas)}${row('Tujuan', l.purpose)}${row('Alamat', l.addr)}<hr>
 ${row('Tgl pinjam', fdt(l.date))}${row('Rencana kembali', fdt(l.due))}${l.ret ? row('Dikembalikan', fdt(l.ret.date)) + row('Kondisi', l.ret.cond) : ''}${row('Catatan', l.note)}<hr>
 ${sig ? `<div class="sk-sig"><img src="${esc(l.sig)}" alt="Tanda tangan peminjam"><span>${esc(l.who)}</span><small>Tanda tangan peminjam</small></div>` : ''}
 <div class="sk-qr" id="skQr"></div><p class="sk-note">Tunjukkan struk ini saat mengambil dan mengembalikan barang.</p>
@@ -615,7 +615,7 @@ ${greetHtml(me || 'Peminjam')}
 ${seg()}
 <form class="search" id="hs">${ic('search')}<input id="hq" type="search" placeholder="Cari nama atau kode barang" aria-label="Cari barang"><button type="button" class="flt" data-tab="barang" aria-label="Lihat semua barang">${ic('sliders')}</button></form></div>
 <div class="sheetc">${pwaBanner()}<div class="quick"><button data-tab="scan"><i class="q1">${ic('qr')}</i>Scan QR</button><button data-tab="barang"><i class="q2">${ic('grid')}</i>Barang</button><button data-heart><i class="q3">${ic('heart')}</i>Favorit</button><button data-tab="mine"><i class="q4">${ic('bag')}</i>Pinjaman</button></div>
-<section class="hero"><div><span class="pill">Baru</span><h2>Pinjam alat praktik</h2><p>Scan QR di barang atau pilih dari daftar untuk mulai meminjam.</p><button class="dark" data-tab="scan">${ic('qr')}Scan sekarang</button></div>${photo('stok1.jpg', 'tag', '', 'eager')}</section>
+<section class="hero"><div><span class="pill">Baru</span><h2>Pinjam barang dengan mudah</h2><p>Scan QR di barang atau pilih dari daftar untuk mulai meminjam.</p><button class="dark" data-tab="scan">${ic('qr')}Scan sekarang</button></div>${photo('stok1.jpg', 'tag', '', 'eager')}</section>
 <div class="stat3"><div>${ic('box')}<b>${D.items.length}</b><span>Barang</span></div><div>${ic('check')}<b>${D.items.filter(i => i.stock).length}</b><span>Tersedia</span></div><div>${ic('clock')}<b>${n}</b><span>Pinjamanku</span></div></div>
 <div class="sec"><h3>${ic('grid')}Kategori</h3><button data-tab="barang">Lihat semua</button></div>
 <div class="cats">${catList().map(([l, e, v]) => `<button class="cat" data-cat="${esc(v)}"><span>${ic(e)}</span>${l}</button>`).join('')}</div>
@@ -672,14 +672,14 @@ function borrow(raw) {
   if (!i.stock) return toast(i.name + ' sedang habis');
   q('#dlgBody').innerHTML = `${photo(i.img, EMO[i.cat] || 'box', i.name)}<div class="t"><h2>${esc(i.name)}</h2><span class="st ok">${i.stock} tersedia</span></div><p class="note">${esc(i.loc)} · kondisi ${esc(i.cond.toLowerCase())}</p>${i.ts ? `<p class="pdt">${CAL}Diposting ${fts(i.ts)}</p>` : ''}
 <form id="bf" data-id="${esc(i.id)}"><label>Nama peminjam<input name="who" required autocomplete="name" value="${esc(me)}"></label>
-<label>Kelas<input name="kelas" required value="${esc(kelas)}" placeholder="Contoh: XI TKJ 1"></label>
+<label>Instansi / Unit<input name="kelas" required value="${esc(kelas)}" placeholder="Contoh: Divisi Umum"></label>
 <label>Alamat lengkap<input name="addr" required autocomplete="street-address" value="${esc(addr)}" placeholder="Contoh: Jl. Sudirman No. 10, Pekanbaru"></label>
 <div class="row" style="margin-top:8px"><button type="button" class="btn" id="geob" data-geo>${ic('pin')}<span>Pakai lokasi saya</span></button><button type="button" class="btn bad" id="geox" data-geoclear hidden>Hapus lokasi</button></div>
 <input type="hidden" name="lat"><input type="hidden" name="lng">
 <p class="small note" id="geost" role="status">GPS opsional. Alamat terisi otomatis dan admin bisa melihat peta.</p>
 <iframe class="map geomap" id="geomap" title="Pratinjau lokasi" hidden></iframe>
 <label>Jumlah<div class="qty"><button type="button" data-qty="-1" aria-label="Kurangi">−</button><input name="qty" type="number" min="1" max="${i.stock}" value="1" required inputmode="numeric"><button type="button" data-qty="1" aria-label="Tambah">+</button></div></label>
-<label>Tujuan<input name="purpose" required placeholder="Contoh: praktik jaringan kelas XI"></label>
+<label>Tujuan<input name="purpose" required placeholder="Contoh: kebutuhan acara atau kegiatan"></label>
 <label>Rencana kembali (maks. 14 hari)<input name="due" type="date" min="${today()}" max="${addDays(14)}" value="${addDays(3)}" required></label>
 <div class="sig-h">Tanda tangan peminjam</div><canvas class="sig" id="sig" aria-label="Kotak tanda tangan"></canvas>
 <div class="row" style="margin-top:6px"><button type="button" class="btn" data-sigclear>Hapus tanda tangan</button></div>
